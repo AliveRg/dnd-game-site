@@ -1,0 +1,13 @@
+# Только для локальной разработки: Postgres на localhost:5432
+# Запуск: npm run db:up   →  в .env: NUXT_DATABASE_URL=postgresql://dnd:dnd@localhost:5432/dnd
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: dnd
+      POSTGRES_PASSWORD: dnd
+      POSTGRES_DB: dnd
+    ports: ["5432:5432"]
+    volumes: [dnd_pg:/var/lib/postgresql]
+volumes:
+  dnd_pg:

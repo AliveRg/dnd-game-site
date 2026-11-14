@@ -1,0 +1,33 @@
+{
+  "name": "dnd-hut-site",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "nuxt dev --port 3100",
+    "build": "nuxt build",
+    "preview": "PORT=3100 node .output/server/index.mjs",
+    "postinstall": "nuxt prepare",
+    "db:up": "docker compose -f dev/docker-compose.yml up -d",
+    "wordstat": "node --env-file=.env scripts/wordstat/collect.mjs"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1168.0",
+    "nodemailer": "^8.0.0",
+    "nuxt": "^4.3.0",
+    "pg": "^8.16.0",
+    "three": "^0.187.0",
+    "vue": "^3.5.0",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.0",
+    "@types/nodemailer": "^7.0.0",
+    "@types/pg": "^8.15.0",
+    "@types/three": "^0.187.0",
+    "exceljs": "^4.4.0",
+    "tailwindcss": "^4.1.0"
+  }
+}
