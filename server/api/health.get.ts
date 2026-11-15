@@ -1,11 +1,6 @@
-export default defineEventHandler(async(event)=>{
-  setResponseHeader(event,'Cache-Control','no-store')
-  try {
-    if(!isDbConfigured()) throw new Error('unconfigured')
-    await useDb().query('SELECT 1')
-    return {ok:true,db:'ok'}
-  } catch {
-    setResponseStatus(event,503)
-    return {ok:false,db:'unavailable'}
-  }
+// Container liveness: database configuration/outages must not restart the web process.
+// Dependency readiness is reported separately at /api/ready.
+export default defineEventHandler((event) => {
+  setResponseHeader(event, 'Cache-Control', 'no-store')
+  return { ok: true }
 })
