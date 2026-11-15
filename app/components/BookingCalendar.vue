@@ -255,7 +255,7 @@ async function submit() {
 .day-full:hover { background-color: #95959522; }
 /* «Казна партии»: блок с итоговой ценой */
 .price-plaque { position: relative; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 4px 16px; padding: 16px 18px 12px; border-radius: 14px;
-  background: radial-gradient(90% 140% at 0% 50%, #DF000026, #0000 60%), linear-gradient(180deg, #161010, #0b0909);
+  background: radial-gradient(90% 140% at 0% 50%, #DF000026, #0000 60%), linear-gradient(180deg, #180505, #0c0202);
   border: 1px solid #DF000066; box-shadow: inset 0 0 0 4px #040404, inset 0 0 0 5px #DF000033, 0 6px 18px #0008; }
 .pp-coins { width: 64px; height: 64px; filter: drop-shadow(0 4px 8px #000a) drop-shadow(0 0 10px #DF000044); }
 .pp-cap { font-size: 10px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: #EEE5CE; }

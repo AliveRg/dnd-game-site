@@ -62,7 +62,7 @@ const site = useRuntimeConfig().public.siteName
 </template>
 
 <style>
-.consent-box { flex: none; width: 18px; height: 18px; margin-top: 1px; border-radius: 4px; border: 1px solid #3a3333; background: #040404; display: grid; place-content: center; cursor: pointer; transition: box-shadow .3s, border-color .3s; }
+.consent-box { flex: none; width: 18px; height: 18px; margin-top: 1px; border-radius: 4px; border: 1px solid #4a1010; background: #0a0202; display: grid; place-content: center; cursor: pointer; transition: box-shadow .3s, border-color .3s; }
 .consent-box.on { background: var(--gold); border-color: #ff8a7a; }
 .consent-box.on::after { content: ''; width: 9px; height: 5px; border: 2px solid #040404; border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px, -1px); }
 .consent-box:focus-visible { outline: 2px solid #DF0000; outline-offset: 2px; }

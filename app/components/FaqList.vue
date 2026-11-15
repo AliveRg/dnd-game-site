@@ -18,7 +18,7 @@ defineProps<{ items: { q: string; a: string }[] }>()
 
 <style>
 :root { interpolate-size: allow-keywords; }
-.faq-item { border-radius: 14px; border: 1px solid #3a3333; overflow: hidden;
+.faq-item { border-radius: 14px; border: 1px solid #4a1010; overflow: hidden;
   background: var(--panel);
   box-shadow: inset 0 1px 0 #ffffff0d, 0 4px 14px #0006; transition: border-color .25s, box-shadow .25s; }
 .faq-item:hover { border-color: #DF000088; }

@@ -43,7 +43,7 @@ const embers = Array.from({ length: 7 }, (_, i) => ({ left: `${10 + i * 13}%`, '
 .tariff { position: relative; border-radius: 16px; isolation: isolate; transition: transform .3s cubic-bezier(.3,.7,.25,1); height: 100%; }
 .tariff:hover { transform: translateY(-3px); }
 .t-body { position: relative; z-index: 1; display: flex; flex-direction: column; height: 100%; padding: 18px 18px 16px; border-radius: inherit; overflow: hidden;
-  background: linear-gradient(180deg, #1b110dee, #040404f5); border: 1px solid #3a3333; }
+  background: linear-gradient(180deg, #1b110dee, #040404f5); border: 1px solid #4a1010; }
 .compact .t-body { padding: 12px 12px 12px; }
 .t-tier { font-size: 10px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
 .t-gem { width: 34px; height: 34px; margin: 10px 0 6px; }

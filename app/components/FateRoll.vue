@@ -45,10 +45,10 @@ const verdict = computed(() => (result.value === 20 ? 'Критический у
             <div class="relative">
             <TarotCard v-model:flipped="flipped" :interactive="false" width="min(320px, 82vw)">
               <GameIcon :slug="game.slug" :width="150" class="mx-auto mb-1 flex-none text-[#5a0000]" />
-              <p class="text-xs uppercase tracking-[.2em] text-[#3a3333]">{{ verdict }}</p>
+              <p class="text-xs uppercase tracking-[.2em] text-[#4a1010]">{{ verdict }}</p>
               <p v-if="game.meta?.series" class="mt-3 text-[11px] uppercase tracking-widest text-[#6b4a24]">{{ game.meta.series }}</p>
               <p class="mt-1 font-display text-[28px] leading-none">{{ shortTitle(game.title, game.meta?.series) }}</p>
-              <div class="mx-auto my-3 h-px w-2/3 bg-[#3a333366]" />
+              <div class="mx-auto my-3 h-px w-2/3 bg-[#4a101066]" />
               <p class="line-clamp-4 text-sm leading-snug">{{ game.excerpt }}</p>
               <div class="mt-auto flex flex-wrap justify-center gap-2 pt-3">
                 <span class="fate-tag">{{ game.meta?.kind }}</span>

@@ -84,6 +84,10 @@ useHead({
             <p class="mt-2 text-sm text-ash">{{ f.text }}</p>
           </div>
         </div>
+        <!-- Атмосфера клуба: реальные фото -->
+        <h3 class="mb-4 mt-10 text-3xl">Как у нас играют</h3>
+        <PhotoGallery compact />
+        <div class="mt-5 flex justify-end"><NuxtLink to="/klub#galereya" class="btn-ghost">Все фото клуба</NuxtLink></div>
       </div>
     </section>
 

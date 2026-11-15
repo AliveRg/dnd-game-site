@@ -14,7 +14,7 @@ defineProps<{ msg?: string | null }>()
 <style>
 .field-error { position: relative; z-index: 5; margin-top: 8px; display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px 7px 8px; border-radius: 10px;
   font-size: 13px; color: #F7F2E6; border: 1px solid #DF000099;
-  background: #161010;
+  background: #180505;
   box-shadow: 0 8px 20px #000a, 0 0 12px #DF000033; }
 .field-error::before { content: ''; position: absolute; top: -6px; left: 18px; width: 10px; height: 10px; transform: rotate(45deg);
   background: #2a1810; border-left: 1px solid #DF000099; border-top: 1px solid #DF000099; }

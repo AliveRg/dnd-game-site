@@ -46,7 +46,7 @@ import { SKULL_SVG } from '#shared/skull'
         <circle class="ig-glow" r="58" fill="url(#ig-torch)" />
         <path d="M-12 18h24l-4 8h-16Z" fill="#959595" />
         <path d="M-4 20h8l-2 46h-4Z" fill="#7a4a22" />
-        <path d="M-9 4h18l-3 16H-6Z" fill="#2a2424" />
+        <path d="M-9 4h18l-3 16H-6Z" fill="#3a0b0b" />
         <path d="M-9 8h18M-8 13h16" stroke="#5a4232" stroke-width="2" />
         <g class="ig-flame">
           <path d="M0-36C9-24 13-17 13-9A13 13 0 0 1-13-9C-13-17-8-24 0-36Z" fill="#DF0000" />
@@ -60,7 +60,7 @@ import { SKULL_SVG } from '#shared/skull'
 
 <style>
 .intro-gate { display: none; }
-[data-intro] .intro-gate { display: block; position: fixed; inset: 0; z-index: 200; background: #040404; pointer-events: none;
+[data-intro] .intro-gate { display: block; position: fixed; inset: 0; z-index: 200; background: #0a0202; pointer-events: none;
   animation: ig-out .55s 1.5s ease forwards; }
 .ig-scene { width: 100%; height: 100%; display: block; transform-origin: 50% 70%;
   animation: ig-show .45s ease both, ig-enter 1.05s .55s cubic-bezier(.55, 0, .85, .35) forwards; }

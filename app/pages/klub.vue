@@ -21,7 +21,10 @@ const rules = ['Уважаем других игроков и их время', 
           <SectionTitle icon="candle" as="h1">О клубе</SectionTitle>
           <p class="text-lg text-parchment/85">{{ cfg.siteName }} - клуб настольных ролевых игр {{ cfg.cityIn }}. Мастер готовит историю заранее, а вы просто приходите: кубики, листы персонажей, карты и миниатюры уже ждут на столе. <!-- TODO: текст заказчика --></p>
           <h3 class="mt-6 text-2xl">Мастер</h3>
-          <p class="mt-2 text-ash">TODO: фото и пара абзацев о мастере - опыт, любимые системы, стиль игры. Для SEO и доверия это один из самых важных блоков.</p>
+          <div class="mt-3 flex flex-col gap-5 sm:flex-row">
+            <img src="/photos/master.webp" alt="Мастер клуба за ширмой с указкой" class="photo-neon aspect-[3/4] w-full flex-none object-cover sm:w-56" loading="lazy" decoding="async" />
+            <p class="text-ash">TODO: пара абзацев о мастере - опыт, любимые системы, стиль игры. Для SEO и доверия это один из самых важных блоков.</p>
+          </div>
         </div>
         <div class="card">
           <h3 class="mb-3 text-2xl">Правила стола</h3>
@@ -30,6 +33,14 @@ const rules = ['Уважаем других игроков и их время', 
           </ul>
           <div class="mt-5 flex justify-end"><NuxtLink to="/kontakty" class="btn-ghost">Как нас найти</NuxtLink></div>
         </div>
+      </div>
+    </section>
+
+    <!-- Галерея -->
+    <section id="galereya" class="section">
+      <div class="container-x">
+        <SectionTitle icon="candle">Фото клуба</SectionTitle>
+        <PhotoGallery />
       </div>
     </section>
 

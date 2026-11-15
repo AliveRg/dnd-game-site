@@ -95,8 +95,8 @@ watch([selectedId, hoverId], () => nextTick(() => { const id = hoverId.value ?? 
 
 <style>
 .map-label { position: absolute; transform: translate(-50%, -50%); pointer-events: none; white-space: nowrap; padding: 5px 12px; border-radius: 8px;
-  font-family: var(--font-display); font-size: 18px; line-height: 1; color: #F7F2E6; background: #040404e6; border: 1px solid #DF000099; box-shadow: 0 6px 16px #000a; }
-.zone-list { max-height: 560px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #3a3333 transparent; display: flex; flex-direction: column; gap: 2px; }
+  font-family: var(--font-display); font-size: 18px; line-height: 1; color: #F7F2E6; background: #0a0202e6; border: 1px solid #DF000099; box-shadow: 0 6px 16px #000a; }
+.zone-list { max-height: 560px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #4a1010 transparent; display: flex; flex-direction: column; gap: 2px; }
 .zone-item { display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 10px; text-align: left; border: 1px solid transparent;
   transition: background var(--t) var(--ease), border-color var(--t) var(--ease), transform var(--t) var(--ease); }
 .zone-item b { display: block; font-size: 14px; font-weight: 700; color: #F7F2E6; }
@@ -107,7 +107,7 @@ watch([selectedId, hoverId], () => nextTick(() => { const id = hoverId.value ?? 
 .zone-item.on { background: #DF000018; border-color: #DF000066; } .zone-item.on .zi-ico, .zone-item:hover .zi-ico { color: #DF0000; }
 .zone-story { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
 .zs-ico { flex: none; color: #DF0000; }
-.zs-tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 99px; border: 1px solid #3a3333; color: #c9c2b4; }
+.zs-tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 99px; border: 1px solid #4a1010; color: #c9c2b4; }
 .zs-enter-active, .zs-leave-active { transition: opacity var(--t) var(--ease), transform var(--t) var(--ease); }
 .zs-enter-from { opacity: 0; transform: translateY(8px); } .zs-leave-to { opacity: 0; }
 </style>

@@ -135,7 +135,7 @@ function toggle() {
 .vc-side { position: absolute; left: -16px; top: 46%; display: flex; flex-direction: column; gap: 6px; z-index: 3; }
 .vc-house, .vc-shield { position: relative; width: 44px; display: grid; place-items: center; font: 800 15px/1 var(--font-sans); color: var(--c1); }
 .vc-house { height: 46px; padding-top: 10px; background: var(--c3); clip-path: polygon(50% 0, 100% 30%, 100% 100%, 0 100%, 0 30%); }
-.vc-shield { height: 48px; padding-bottom: 8px; background: #F7F2E6; color: #2a2424; clip-path: polygon(0 0, 100% 0, 100% 55%, 50% 100%, 0 55%); }
+.vc-shield { height: 48px; padding-bottom: 8px; background: #F7F2E6; color: #3a0b0b; clip-path: polygon(0 0, 100% 0, 100% 55%, 50% 100%, 0 55%); }
 .vc-house::before, .vc-shield::before { content: ''; position: absolute; inset: 3px; background: inherit; filter: brightness(1.12); clip-path: inherit; z-index: -1; }
 .vc-side small { display: block; font-size: 8px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; opacity: .75; margin-bottom: 2px; text-align: center; }
 .vc-orb { position: absolute; right: -14px; top: 9%; z-index: 3; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;

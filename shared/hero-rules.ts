@@ -28,7 +28,7 @@ export type SkillId = (typeof SKILLS)[number]['id']
 
 export const RARITY: Record<Rarity, { name: string; chance: string; color: string; d20: string }> = {
   common: { name: 'Обычный', chance: '75%', color: '#959595', d20: '1-15' },
-  rare: { name: 'Редкий', chance: '20%', color: '#f0a040', d20: '16-19' },
+  rare: { name: 'Редкий', chance: '20%', color: '#ff7a3c', d20: '16-19' },
   legendary: { name: 'Легендарный', chance: '5%', color: '#DF0000', d20: '20' }
 }
 export const rarityFromD20 = (n: number): Rarity => (n === 20 ? 'legendary' : n >= 16 ? 'rare' : 'common')

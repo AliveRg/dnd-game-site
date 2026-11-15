@@ -10,7 +10,10 @@ useSiteSeo({ title: `Контакты - клуб НРИ ${cfg.cityIn}`, descript
       <SectionTitle icon="candle" as="h1">Контакты</SectionTitle>
       <!-- TODO: адрес, карта Яндекса (iframe), Telegram, VK, часы работы. Адрес + карта - сильный сигнал для локального SEO -->
       <p class="-mt-3 text-ash">{{ cfg.city }}, адрес уточняется.</p>
-      <div class="mt-8 max-w-md"><QuickForm /></div>
+      <div class="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,28rem)_1fr]">
+        <QuickForm />
+        <img src="/photos/room.webp" alt="Игровая комната клуба" class="photo-neon aspect-[3/4] w-full max-w-sm justify-self-center object-cover lg:justify-self-end" loading="lazy" decoding="async" />
+      </div>
     </div>
   </section>
 </template>
