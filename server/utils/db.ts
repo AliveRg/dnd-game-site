@@ -1,5 +1,6 @@
 import pg from 'pg'
 import { TIMEWEB_CA } from './timeweb-ca'
+import { normalizeDatabaseUrl } from './database-config'
 
 let pool: pg.Pool | null = null
 
@@ -10,7 +11,7 @@ export function useDb(): pg.Pool {
     throw createError({ statusCode: 503, message: 'База данных не настроена (NUXT_DATABASE_URL)' })
   }
   pool = new pg.Pool({
-    connectionString: config.databaseUrl,
+    connectionString: normalizeDatabaseUrl(config.databaseUrl),
     // NUXT_DB_SSL=true → SSL с проверкой сертификата Timeweb (аналог sslmode=verify-full)
     ssl: String(config.dbSsl) === 'true' ? { ca: TIMEWEB_CA, rejectUnauthorized: true } : undefined,
     max: 5,
@@ -50,7 +51,7 @@ let dbDownUntil = 0
 export async function cachedDb<T>(key: string, ttlMs: number, load: () => Promise<T>, fallback: () => T): Promise<T> {
   const hit = cache.get(key)
   if (hit && Date.now() - hit.at < ttlMs) return hit.value
-  if (!isDbConfigured() || Date.now() < dbDownUntil) return hit?.value ?? fallback()
+  if (!isDbConfigured() || Date.now() < dbDownUntil) return hit ? hit.value : fallback()
   try {
     const value = await load()
     cache.set(key, { at: Date.now(), value })
@@ -58,7 +59,7 @@ export async function cachedDb<T>(key: string, ttlMs: number, load: () => Promis
   } catch (e: any) {
     console.error(`[${key}] БД недоступна:`, e.message)
     dbDownUntil = Date.now() + 30_000
-    return hit?.value ?? fallback()
+    return hit ? hit.value : fallback()
   }
 }
 export function dropDbCache(prefix = '') {

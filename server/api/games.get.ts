@@ -12,6 +12,6 @@ export default defineEventHandler(async () =>
       const { rows } = await useDb().query(`SELECT id, type, slug, title, excerpt, cover, meta FROM posts WHERE type = 'game' AND published ORDER BY id`)
       return rows.map((r) => ({ ...r, meta: { ...r.meta, map: r.meta?.map ?? defaultMap(r.slug) } }))
     },
-    () => isDbConfigured() ? [] : seed() // БД недоступна - сайт не падает, показываем стартовые сюжеты
+    seed // Cold-start outage uses the original public catalog; a cached DB result (even []) wins.
   ))
 )

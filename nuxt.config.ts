@@ -67,7 +67,7 @@ export default defineNuxtConfig({
         { rel: 'preload', as: 'font', type: 'font/woff2', href: '/fonts/inter-cyrillic-wght-normal.woff2', crossorigin: '' },
         { rel: 'preload', as: 'font', type: 'font/woff2', href: '/fonts/cormorant-sc-cyrillic-700-normal.woff2', crossorigin: '' }
       ],
-      meta: [{ name: 'theme-color', content: '#120d0a' }]
+      meta: [{ name: 'theme-color', content: '#120d0a' }, { name: 'yandex-verification', content: '4b93841bf1a2d148' }]
     }
   },
 

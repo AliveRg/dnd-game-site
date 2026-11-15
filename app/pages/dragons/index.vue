@@ -10,7 +10,7 @@ const api=async(url:string,options:any={})=>{
  catch(e:any){if(e?.status===401||e?.statusCode===401){authenticated.value=false;login.password=''}throw e}
 }
 provide('adminFetch',api)
-async function enter(){pending.value=true;error.value='';try{await api('/api/admin/login',{method:'POST',body:login});login.password='';authenticated.value=true}catch(e:any){error.value=e?.data?.message||'Не удалось войти'}finally{pending.value=false}}
+async function enter(){pending.value=true;error.value='';try{await api('/api/admin/login',{method:'POST',body:login});login.password='';authenticated.value=true}catch(e:any){error.value=e?.data?.message||e?.data?.statusMessage||'Не удалось войти'}finally{pending.value=false}}
 async function logout(){error.value='';try{await api('/api/admin/logout',{method:'POST'});authenticated.value=false;login.password=''}catch(e:any){error.value=e?.data?.message||'Выход не выполнен. Проверьте соединение'}}
 function connection(){online.value=navigator.onLine}
 onMounted(async()=>{
