@@ -8,10 +8,10 @@ function sessionConfig() {
   if (!password || password.length < 32) {
     throw createError({ statusCode: 503, message: 'NUXT_SESSION_PASSWORD должен быть 32+ символа' })
   }
-  return { name: SESSION_NAME, password, maxAge: 60 * 60 * 24 * 7, cookie: { sameSite: 'lax' as const, httpOnly: true } }
+  return { name: SESSION_NAME, password, maxAge: 60 * 60 * 24 * 7, cookie: { sameSite: 'lax' as const, httpOnly: true, secure: process.env.NODE_ENV === 'production' } }
 }
 
-export const getAdminSession = (event: H3Event) => useSession<{ admin?: boolean }>(event, sessionConfig())
+export const getAdminSession = (event: H3Event) => useSession<{ admin?: boolean; sessionId?: string }>(event, sessionConfig())
 
 export function checkCredentials(login: string, password: string) {
   const c = useRuntimeConfig()
@@ -26,7 +26,10 @@ export function checkCredentials(login: string, password: string) {
 
 export async function requireAdmin(event: H3Event) {
   const session = await getAdminSession(event)
-  if (!session.data.admin) throw createError({ statusCode: 401, message: 'Нужен вход' })
+  setResponseHeader(event, 'Cache-Control', 'no-store')
+  if (!session.data.admin || !session.data.sessionId) throw createError({ statusCode: 401, message: 'Нужен вход' })
+  const active = await useDb().query('SELECT 1 FROM admin_sessions WHERE id=$1 AND expires_at>now()', [session.data.sessionId])
+  if (!active.rowCount) { await session.clear(); throw createError({statusCode:401,message:'Сессия завершена. Войдите снова'}) }
 }
 
 // Простой rate-limit в памяти (для логина и заявок)

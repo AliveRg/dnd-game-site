@@ -1,149 +1,46 @@
-// Сбор реальной частотности из Яндекс Вордстата (Yandex Cloud Search API v2) и заполнение SEO-ядра.
-//
-// Запуск на своём компьютере (в облаке Claude API Яндекса недоступен):
-//   1) в .env: WORDSTAT_API_KEY, WORDSTAT_FOLDER_ID (ID каталога в console.yandex.cloud), WORDSTAT_REGIONS=2
-//   2) npm run wordstat
-// Результат: seo/semantic-core-filled.xlsx  (+ сырые ответы в seo/raw/)
-//
-// Что делает:
-//   • для каждой маски из seeds.json берёт топ-2000 запросов (topRequests) — это реальные фразы с частотой;
-//   • заполняет «Частотность WS» в листе «Ядро» для совпавших фраз;
-//   • добавляет лист «Wordstat_реальные» со всеми найденными фразами, группой и кластером;
-//   • отдельным проходом уточняет точную частоту "!слово !слово" для Ключевых/Целевых (лимит WORDSTAT_EXACT_LIMIT).
-// Платно: каждый запрос тарифицируется по прайсу Search API в Yandex Cloud — проверь баланс.
-
+// Bounded Wordstat research; credentials are local-only. No made-up counts.
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import ExcelJS from 'exceljs'
-
-const API = 'https://searchapi.api.cloud.yandex.net/v2/wordstat/topRequests'
-const KEY = process.env.WORDSTAT_API_KEY
-const FOLDER = process.env.WORDSTAT_FOLDER_ID
-const REGIONS = (process.env.WORDSTAT_REGIONS || '2').split(',').map((s) => s.trim()).filter(Boolean)
-const EXACT_LIMIT = Number(process.env.WORDSTAT_EXACT_LIMIT || 300)
-const PAUSE = Number(process.env.WORDSTAT_PAUSE_MS || 400)
-const ROOT = path.resolve(import.meta.dirname, '../..')
-const SRC = path.join(ROOT, 'seo/semantic-core.xlsx')
-const OUT = path.join(ROOT, 'seo/semantic-core-filled.xlsx')
-const RAW = path.join(ROOT, 'seo/raw')
-
-if (!KEY) { console.error('Нет WORDSTAT_API_KEY в .env'); process.exit(1) }
-if (!FOLDER) console.warn('⚠ WORDSTAT_FOLDER_ID пуст — если API ответит ошибкой, укажи ID каталога из консоли Yandex Cloud')
-
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
-const norm = (s) => s.toLowerCase().replace(/ё/g, 'е').replace(/[!+"\[\]]/g, '').replace(/\s+/g, ' ').trim()
-
-async function top(phrase, numPhrases = 2000, attempt = 1) {
-  const res = await fetch(API, {
-    method: 'POST',
-    headers: { Authorization: `Api-Key ${KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ phrase, numPhrases: String(numPhrases), regions: REGIONS, devices: ['DEVICE_ALL'], ...(FOLDER ? { folderId: FOLDER } : {}) })
-  })
-  if ((res.status === 429 || res.status >= 500) && attempt < 5) {
-    await sleep(1000 * attempt * attempt)
-    return top(phrase, numPhrases, attempt + 1)
-  }
-  if (!res.ok) throw new Error(`${res.status} ${await res.text()}`)
-  return res.json()
+const root = path.resolve(import.meta.dirname, '../..')
+const key = process.env.WORDSTAT_API_KEY, folderId = process.env.WORDSTAT_FOLDER_ID
+if (!key || !folderId) throw new Error('Set WORDSTAT_API_KEY and WORDSTAT_FOLDER_ID')
+const base = 'https://searchapi.api.cloud.yandex.net/v2/wordstat/'
+const raw = path.join(root, 'seo/raw')
+await fs.mkdir(raw, { recursive: true })
+async function call(method, body, attempt = 0) {
+ const res = await fetch(base + method, { method:'POST', headers:{Authorization:`Api-Key ${key}`,'Content-Type':'application/json'}, body:JSON.stringify({folderId,...body}), signal:AbortSignal.timeout(30000) })
+ if ((res.status===429 || res.status>=500) && attempt<2) { await new Promise(r=>setTimeout(r,1000*(attempt+1))); return call(method,body,attempt+1) }
+ const data = await res.json().catch(()=>({}))
+ if (!res.ok) throw new Error(`Wordstat HTTP ${res.status}: ${String(data.message || data.error?.message || 'request failed').replaceAll(key,'[redacted]')}`)
+ return data
 }
-
-// Та же логика групп, что в ядре
-const GEO = /(спб|питер|петербург|санкт|рядом|поблизости|недалеко)/
-const COMMERCE = /(поиграть|играть|сыграть|запис|клуб|мастер|цена|стоим|стоит|недорого|игротек|антикафе|партию|групп|игроков|новичк|начина|вживую|оффлайн|офлайн|сегодня|выходн|расписан|друз|рожден|корпорат)/
-const TARGET = /(ваншот|хоррор|детектив|двоих|витрувий|свеч|диско|гоблин|бастион|каштанищ|асмоде|полурослик|налянск|эндеми|химера|под стеклом|хижин|18\+|акци|скидк)/
-const INFO = /(что такое|правил|как играть|классы|расы|лист персонажа|создание персонажа|википеди)/
-function classify(q) {
-  if (TARGET.test(q)) return 'Целевой'
-  if (COMMERCE.test(q) && GEO.test(q)) return 'Ключевой'
-  if (COMMERCE.test(q)) return 'Узкий (запись)'
-  if (GEO.test(q) && !INFO.test(q)) return 'Ключевой'
-  return 'Широкий'
+const stamp = new Date().toISOString()
+const diagnostic = await call('topRequests',{phrase:'днд',numPhrases:'20',regions:['225'],devices:['DEVICE_ALL']})
+await fs.writeFile(path.join(raw,'diagnostic.json'),JSON.stringify(diagnostic,null,2))
+if (process.argv.includes('--diagnostic')) { console.log('Wordstat diagnostic OK; raw response saved locally'); process.exit(0) }
+// Verify Belgorod against official region response before collecting local queries.
+const regions = await call('getRegionsTree',{})
+await fs.writeFile(path.join(raw,'regions.json'),JSON.stringify(regions,null,2))
+function findRegion(x) { if (!x || typeof x!=='object') return; if (/^белгород$/i.test(x.label||x.name||x.regionName||'')) return String(x.id||x.regionId); for (const v of Object.values(x)) { if (v && typeof v==='object') { const found=findRegion(v); if(found)return found } } }
+const belgorod = findRegion(regions)
+if (!belgorod) throw new Error('Belgorod not verified in region tree; local collection stopped')
+const seeds=JSON.parse(await fs.readFile(path.join(import.meta.dirname,'seeds.json'),'utf8')).slice(0,Math.min(30,Number(process.env.WORDSTAT_MASK_LIMIT||30)))
+const rows=[]
+for (let i=0;i<seeds.length;i++) {
+ const seed=seeds[i], region=/белгород/i.test(seed.phrase)?belgorod:'225'
+ const data=await call('topRequests',{phrase:seed.phrase,numPhrases:'100',regions:[region],devices:['DEVICE_ALL']})
+ await fs.writeFile(path.join(raw,`mask-${i}.json`),JSON.stringify(data,null,2))
+ for (const hit of data.results||[]) rows.push({phrase:hit.phrase,count:Number(hit.count),match_type:'broad',region,period:'API statistics unavailable after 2026-10-07',fetched_at:stamp,seed:seed.phrase,cluster:region===belgorod?'local':'reference',proposed_url:region===belgorod?'/dnd-belgorod':'/spravochnik'})
+ await new Promise(r=>setTimeout(r,400))
 }
-
-async function main() {
-  await fs.mkdir(RAW, { recursive: true })
-  const seeds = JSON.parse(await fs.readFile(path.join(import.meta.dirname, 'seeds.json'), 'utf8'))
-
-  const wb = new ExcelJS.Workbook()
-  await wb.xlsx.readFile(SRC)
-  const core = wb.getWorksheet('Ядро')
-  const masks = wb.getWorksheet('Маски Wordstat')
-
-  // 1) Маски → реальные фразы
-  const found = new Map() // phrase -> { count, seed, kind }
-  for (let i = 0; i < seeds.length; i++) {
-    const s = seeds[i]
-    process.stdout.write(`[${i + 1}/${seeds.length}] ${s.phrase} … `)
-    try {
-      const r = await top(s.phrase)
-      await fs.writeFile(path.join(RAW, `${i}-${s.phrase.replace(/[^\p{L}\p{N}]+/gu, '_')}.json`), JSON.stringify(r, null, 2))
-      for (const p of r.results ?? []) {
-        const k = norm(p.phrase)
-        const c = Number(p.count)
-        if (!found.has(k) || found.get(k).count < c) found.set(k, { count: c, seed: s.phrase, kind: 'топ' })
-      }
-      for (const p of r.associations ?? []) {
-        const k = norm(p.phrase)
-        if (!found.has(k)) found.set(k, { count: Number(p.count), seed: s.phrase, kind: 'похожий' })
-      }
-      masks.getRow(i + 2).getCell(3).value = Number(r.totalCount ?? 0)
-      console.log(`${r.results?.length ?? 0} фраз, всего ${r.totalCount}`)
-    } catch (e) {
-      console.log('ошибка:', e.message)
-      if (i === 0) { console.error('Первый же запрос упал — проверь ключ, роль search-api.webSearch.user и folderId.'); process.exit(1) }
-    }
-    await sleep(PAUSE)
-  }
-
-  // 2) Заполняем частоты в ядре
-  let matched = 0
-  const exactQueue = []
-  core.eachRow((row, n) => {
-    if (n === 1) return
-    const q = norm(String(row.getCell(2).value ?? ''))
-    const f = found.get(q)
-    if (f) { row.getCell(8).value = f.count; row.getCell(10).value = 'wordstat'; matched++ }
-    else row.getCell(8).value = 0
-    const g = row.getCell(3).value
-    if ((g === 'Ключевой' || g === 'Целевой') && f && f.count > 0) exactQueue.push({ row, q, count: f.count })
-  })
-  console.log(`\nСовпало с ядром: ${matched}. Всего реальных фраз: ${found.size}`)
-
-  // 3) Точная частота для самых частотных ключевых/целевых
-  exactQueue.sort((a, b) => b.count - a.count)
-  const exact = exactQueue.slice(0, EXACT_LIMIT)
-  for (let i = 0; i < exact.length; i++) {
-    const { row, q } = exact[i]
-    const op = '"' + q.split(' ').map((w) => `!${w}`).join(' ') + '"'
-    try {
-      const r = await top(op, 1)
-      row.getCell(9).value = Number(r.totalCount ?? 0)
-    } catch (e) { row.getCell(9).value = null }
-    if (i % 20 === 0) console.log(`точная частота: ${i}/${exact.length}`)
-    await sleep(PAUSE)
-  }
-
-  // 4) Лист с реальными фразами
-  const old = wb.getWorksheet('Wordstat_реальные')
-  if (old) wb.removeWorksheet(old.id)
-  const ws = wb.addWorksheet('Wordstat_реальные')
-  ws.columns = [
-    { header: 'Запрос', key: 'q', width: 60 },
-    { header: 'Частотность WS', key: 'c', width: 16 },
-    { header: 'Группа (авто)', key: 'g', width: 18 },
-    { header: 'Тип', key: 'k', width: 12 },
-    { header: 'Маска', key: 's', width: 30 },
-    { header: `Регион(ы)`, key: 'r', width: 12 }
-  ]
-  ;[...found.entries()].sort((a, b) => b[1].count - a[1].count).forEach(([q, f]) =>
-    ws.addRow({ q, c: f.count, g: classify(q), k: f.kind, s: f.seed, r: REGIONS.join(',') })
-  )
-  ws.getRow(1).font = { bold: true }
-  ws.autoFilter = 'A1:F1'
-  ws.views = [{ state: 'frozen', ySplit: 1 }]
-
-  await wb.xlsx.writeFile(OUT)
-  console.log(`\nГотово → ${path.relative(ROOT, OUT)}`)
+const exactLimit=Math.min(20,Number(process.env.WORDSTAT_EXACT_LIMIT||20))
+const unique=[...new Map(rows.map(x=>[`${x.region}:${x.phrase}`,x])).values()].sort((a,b)=>b.count-a.count)
+for (const row of unique.slice(0,exactLimit)) {
+ const phrase='"'+row.phrase.split(/\s+/).map(x=>'!'+x).join(' ')+'"'
+ const data=await call('topRequests',{phrase,numPhrases:'1',regions:[row.region],devices:['DEVICE_ALL']})
+ rows.push({...row,count:Number(data.totalCount),match_type:'exact'})
 }
-
-main().catch((e) => { console.error(e); process.exit(1) })
+const keys=['phrase','count','match_type','region','period','fetched_at','seed','cluster','proposed_url']
+const csv=[keys.join(','),...rows.map(row=>keys.map(k=>'"'+String(row[k]??'').replaceAll('"','""')+'"').join(','))].join('\n')
+await fs.writeFile(path.join(root,'seo/wordstat-report.csv'),csv)
+console.log(`Saved ${rows.length} measured rows (historic availability limit stated in CSV)`)

@@ -1,8 +1,7 @@
 <script setup lang="ts">
 // Тариф как предмет D&D: обычный / редкий / легендарный. Анимации - только transform/opacity (дёшево для GPU).
-import { TIER_LABEL, REGULAR_PRICE_4H, PROMO_UNTIL } from '#shared/utils/pricing'
+import { TIER_LABEL } from '#shared/utils/pricing'
 const props = defineProps<{ t: { id: string; title: string; hours: number; price: number; note: string; tier: 'common' | 'rare' | 'legendary'; badge?: string }; selected?: boolean; compact?: boolean }>()
-const until = new Date(PROMO_UNTIL).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
 const embers = Array.from({ length: 7 }, (_, i) => ({ left: `${10 + i * 13}%`, '--d': `${2.2 + (i % 3) * 0.7}s`, '--delay': `${-i * 0.55}s` }))
 </script>
 
@@ -31,7 +30,6 @@ const embers = Array.from({ length: 7 }, (_, i) => ({ left: `${10 + i * 13}%`, '
       <p class="t-title">{{ t.title }}</p>
       <template v-if="!compact">
         <p class="mt-1 text-sm text-ash">с человека · {{ t.hours }} {{ t.hours === 6 ? 'часов' : 'часа' }} игры</p>
-        <p v-if="t.id === 'promo4'" class="mt-1 text-xs text-candle">Акция до {{ until }}, далее {{ REGULAR_PRICE_4H }} ₽</p>
         <p class="mt-3 flex-1 text-sm text-parchment/80">{{ t.note }}</p>
         <div class="mt-4 flex justify-end"><slot /></div>
       </template>

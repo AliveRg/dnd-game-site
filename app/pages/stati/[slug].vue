@@ -1,10 +1,7 @@
 <script setup lang="ts">
-import { ARTICLES } from '#shared/seo-pages'
-const route = useRoute()
-const page = ARTICLES.find((p) => p.slug === route.params.slug)
-if (!page) throw createError({ statusCode: 404, statusMessage: 'Статья не найдена', fatal: true })
+const route=useRoute()
+const {data:post,error}=await useFetch<any>(`/api/posts/${route.params.slug}`)
+if(error.value||!post.value||post.value.type!=='article')throw createError({statusCode:404,message:'Статья не найдена',fatal:true})
+useSiteSeo({title:post.value.seo_title||post.value.title,description:post.value.seo_description||post.value.excerpt,image:post.value.cover||undefined,type:'article'})
 </script>
-
-<template>
-  <SeoPageView v-if="page" :page="page" />
-</template>
+<template><div><div class="container-x pt-8"><NuxtLink to="/stati" class="text-candle">← Статьи</NuxtLink></div><PublishedPost :post="post"/></div></template>

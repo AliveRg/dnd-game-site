@@ -1,6 +1,6 @@
 # ---------- Сборка ----------
 # lts = последняя LTS-версия Node.js на момент сборки
-FROM node:lts-alpine AS build
+FROM node:24.15.0-alpine AS build
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -10,7 +10,7 @@ COPY . .
 RUN npm run build
 
 # ---------- Продакшен ----------
-FROM node:lts-alpine AS runtime
+FROM node:24.15.0-alpine AS runtime
 WORKDIR /app
 
 ENV NODE_ENV=production \

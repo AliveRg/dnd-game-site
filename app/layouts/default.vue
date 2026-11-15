@@ -3,20 +3,11 @@ import { LANDINGS, ARTICLES, pagePath, fillCity } from '#shared/seo-pages'
 const cfg = useRuntimeConfig().public
 const route = useRoute()
 const open = ref(false)
-// Меню из 4 пунктов: объединённые страницы
 const nav = [
-  { to: '/', label: 'Главная' },
-  { to: '/klub', label: 'Клуб и статьи' },
-  { to: '/games', label: 'Сюжеты и карта' },
-  { to: '/raspisanie', label: 'Расписание и цены' },
-  { to: '/kontakty', label: 'Контакты' }
+ {to:'/',label:'Главная'},{to:'/informaciya',label:'Информация'},{to:'/klub',label:'Клуб'},
+ {to:'/stati',label:'Статьи'},{to:'/games',label:'Сюжеты и карта'},
+ {to:'/spravochnik',label:'Справочник'},{to:'/kontakty',label:'Контакты'}
 ]
-// Генератор героя: на главной - прокрутка к блоку, на других страницах - блок на «Сюжеты и карта»
-function goGenerator() {
-  open.value = false
-  // генератор теперь один большой лист на своей странице
-  navigateTo('/generator-geroya')
-}
 const short = (s: string) => fillCity(s, cfg.cityIn, cfg.city).replace(/:.*$/, '')
 // Блок записи внизу каждой страницы (кроме тех, где он не нужен)
 const showBooking = computed(() => !route.path.startsWith('/dragons'))
@@ -50,19 +41,19 @@ useHead({
           <LogoSkull />
           <span class="gold-text whitespace-nowrap font-display text-xl leading-none lg:max-xl:hidden">{{ cfg.siteName }}</span>
         </NuxtLink>
-        <nav class="hidden items-center gap-1.5 lg:flex" aria-label="Основное меню">
+        <nav class="hidden items-center gap-1.5 xl:flex" aria-label="Основное меню">
           <NuxtLink v-for="n in nav" :key="n.to" :to="n.to" class="nav-pill whitespace-nowrap">{{ n.label }}</NuxtLink>
         </nav>
-        <div class="hidden items-center gap-2 lg:flex">
-          <button type="button" class="btn-ghost hidden whitespace-nowrap px-3 py-2 text-sm xl:inline-flex" title="Генератор героя" @click="goGenerator">🎲<span class="hidden min-[1360px]:inline">Генератор героя</span></button>
+        <div class="hidden items-center gap-2 xl:flex">
+
           <NuxtLink to="#booking" class="btn-primary whitespace-nowrap py-2">Записаться</NuxtLink>
         </div>
-        <button class="nav-pill lg:hidden" :aria-expanded="open" aria-label="Меню" @click="open = !open">☰</button>
+        <button class="nav-pill xl:hidden" :aria-expanded="open" aria-label="Меню" @click="open = !open">☰</button>
       </div>
       <div class="metal-band" />
-      <nav v-if="open" class="container-x grid gap-2 bg-ink py-4 lg:hidden" @click="open = false">
+      <nav v-if="open" class="container-x grid gap-2 bg-ink py-4 xl:hidden" @click="open = false">
         <NuxtLink v-for="n in nav" :key="n.to" :to="n.to" class="nav-pill py-2.5">{{ n.label }}</NuxtLink>
-        <div class="flex justify-end gap-2"><button type="button" class="btn-ghost" @click.stop="goGenerator">Генератор героя</button><NuxtLink to="#booking" class="btn-primary">Записаться</NuxtLink></div>
+        <div class="flex justify-end gap-2"><NuxtLink to="#booking" class="btn-primary">Записаться</NuxtLink></div>
       </nav>
     </header>
 
@@ -86,7 +77,7 @@ useHead({
         <div>
           <p class="mb-2 font-semibold text-parchment">Клуб</p>
           <NuxtLink v-for="n in nav" :key="n.to" :to="n.to" class="block py-0.5 hover:text-candle">{{ n.label }}</NuxtLink>
-          <NuxtLink to="/generator-geroya" class="block py-0.5 hover:text-candle">Генератор героя</NuxtLink>
+          <a href="tel:+79040901764" class="block py-2 text-candle">+7 (904) 090-17-64</a>
         </div>
       </div>
       <div class="container-x flex flex-col justify-between gap-4 md:flex-row">

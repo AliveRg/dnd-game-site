@@ -6,7 +6,9 @@ export function useSiteSeo(opts: { title: string; description: string; image?: s
   const url = site + (opts.path ?? route.path)
   const image = opts.image?.startsWith('http') ? opts.image : site + (opts.image || '/images/og.jpg')
 
+  const hostname = useRequestURL().hostname
   useSeoMeta({
+    robots: String(cfg.indexable) !== 'true' || hostname !== new URL(site).hostname ? 'noindex, nofollow' : 'index, follow',
     title: opts.title,
     description: opts.description,
     ogTitle: opts.title,

@@ -1,4 +1,7 @@
 <script setup lang="ts">
+const route = useRoute()
+const metricId = Number(useRuntimeConfig().public.yandexMetrikaId)
+useHead(() => ({ noscript: route.path.startsWith('/dragons') || !metricId ? [] : [{ innerHTML: `<div><img src="https://mc.yandex.ru/watch/${metricId}" style="position:absolute;left:-9999px" alt="" /></div>` }] }))
 // Вход в подземелье: один раз за сессию, до первой отрисовки ставим data-intro на <html> (см. IntroGate.vue).
 // Через 2.7 с атрибут снимается, чтобы анимации входа не мешали hover-эффектам.
 useHead({

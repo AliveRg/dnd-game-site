@@ -2,7 +2,8 @@
 export default defineEventHandler(async (event) => {
   const q = getQuery(event)
   const type = String(q.type || 'news')
-  const limit = Math.min(Number(q.limit) || 12, 50)
+  if (!['game','news','article','novelty','reference'].includes(type)) throw createError({statusCode:400})
+  const limit = Math.max(1, Math.min(Math.floor(Number(q.limit)) || 12, 100))
   const rows = await cachedDb(
     `posts:${type}:${limit}`,
     60_000,

@@ -23,10 +23,6 @@ const { data: games } = await useGames()
       </div>
     </section>
 
-    <section id="generator" class="section">
-      <div class="container-x">
-        <HeroTeaser />
-      </div>
-    </section>
+
   </div>
 </template>

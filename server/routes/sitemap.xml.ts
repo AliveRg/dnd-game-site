@@ -1,5 +1,5 @@
 import { seedGames } from '../data/games'
-import { ALL_SEO_PAGES, pagePath } from '#shared/seo-pages'
+import { LANDINGS, pagePath } from '#shared/seo-pages'
 
 export default defineEventHandler(async (event) => {
   const site = useRuntimeConfig().public.siteUrl.replace(/\/$/, '')
@@ -7,16 +7,17 @@ export default defineEventHandler(async (event) => {
     { loc: '/', priority: '1.0' },
     { loc: '/games', priority: '0.9' },
     { loc: '/klub', priority: '0.7' },
-    { loc: '/raspisanie', priority: '0.9' },
-    { loc: '/generator-geroya', priority: '0.7' },
+    { loc: '/informaciya', priority: '0.7' },
+    { loc: '/stati', priority: '0.7' },
+    { loc: '/spravochnik', priority: '0.7' },
 
     { loc: '/kontakty', priority: '0.6' },
-    ...ALL_SEO_PAGES.map((p) => ({ loc: pagePath(p), priority: p.kind === 'landing' ? '0.9' : '0.6' }))
+    ...LANDINGS.map((p) => ({ loc: pagePath(p), priority: p.kind === 'landing' ? '0.9' : '0.6' }))
   ]
   if (isDbConfigured()) {
     const { rows } = await useDb().query(`SELECT type, slug, updated_at FROM posts WHERE published`)
     for (const r of rows) {
-      urls.push({ loc: r.type === 'game' ? `/games/${r.slug}` : `/news/${r.slug}`, lastmod: new Date(r.updated_at).toISOString(), priority: r.type === 'game' ? '0.8' : '0.5' })
+      urls.push({ loc: r.type === 'game' ? `/games/${r.slug}` : r.type === 'article' ? `/stati/${r.slug}` : r.type === 'reference' ? `/spravochnik/${r.slug}` : `/news/${r.slug}`, lastmod: new Date(r.updated_at).toISOString(), priority: r.type === 'game' ? '0.8' : '0.5' })
     }
   } else {
     for (const g of seedGames) urls.push({ loc: `/games/${g.slug}`, priority: '0.8' })

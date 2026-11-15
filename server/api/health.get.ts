@@ -1,13 +1,11 @@
-export default defineEventHandler(async () => {
-  let db: 'off' | 'ok' | 'error' = 'off'
-  if (isDbConfigured()) {
-    try {
-      await useDb().query('SELECT 1')
-      db = 'ok'
-    } catch {
-      db = 'error'
-    }
+export default defineEventHandler(async(event)=>{
+  setResponseHeader(event,'Cache-Control','no-store')
+  try {
+    if(!isDbConfigured()) throw new Error('unconfigured')
+    await useDb().query('SELECT 1')
+    return {ok:true,db:'ok'}
+  } catch {
+    setResponseStatus(event,503)
+    return {ok:false,db:'unavailable'}
   }
-  // Всегда 200, чтобы App Platform не перезапускал контейнер из-за временных проблем с БД
-  return { ok: true, db, time: new Date().toISOString() }
 })

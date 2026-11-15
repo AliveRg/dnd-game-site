@@ -1,48 +1,34 @@
-// Яндекс Метрика для SPA: init с defer + ручной hit на каждую смену страницы.
-// Цели: ymGoal('booking_sent'), ymGoal('hero_form_sent') - создать такие же в интерфейсе Метрики (тип "JavaScript-событие").
-declare global {
-  interface Window { ym?: (...args: any[]) => void }
-}
-
+declare global { interface Window { ym?: (...args: any[]) => void; dataLayer?: unknown[] } }
 export default defineNuxtPlugin(() => {
   const id = Number(useRuntimeConfig().public.yandexMetrikaId)
   const router = useRouter()
-
+  const admin = (path: string) => path === '/dragons' || path.startsWith('/dragons/')
+  if (admin(router.currentRoute.value.path)) return { provide: { ymGoal: () => {} } }
+  window.dataLayer ||= []
   if (id) {
-    ;(function (m: any, e: Document, t: string, r: string, i: string) {
-      m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) }
-      m[i].l = Date.now()
-      const k = e.createElement(t) as HTMLScriptElement
-      k.async = true
-      k.src = r
-      e.head.appendChild(k)
-    })(window, document, 'script', `https://mc.yandex.ru/metrika/tag.js?id=${id}`, 'ym')
-
-    window.ym!(id, 'init', { defer: true, clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: true })
-    window.ym!(id, 'hit', location.href, { title: document.title, referer: document.referrer })
-
-    let prev = location.href
-    router.afterEach((to) => {
+    const w = window as any
+    w.ym ||= function () { (w.ym.a ||= []).push(arguments) }
+    w.ym.l = Date.now()
+    const src = `https://mc.yandex.ru/metrika/tag.js?id=${id}`
+    if (![...document.scripts].some(s => s.src === src)) {
+      const script = document.createElement('script'); script.async = true; script.src = src; document.head.appendChild(script)
+    }
+    window.ym!(id, 'init', { defer: true, ssr: true, webvisor: true, clickmap: true, ecommerce: 'dataLayer', referrer: document.referrer, url: location.href, accurateTrackBounce: true, trackLinks: true })
+    window.ym!(id, 'hit', location.origin + location.pathname, { title: document.title, referer: document.referrer })
+    let previous = location.origin + location.pathname
+    router.beforeEach(to => {
+      if (admin(to.path)) { location.assign(to.fullPath); return false }
+    })
+    router.afterEach(to => {
+      if (admin(to.path)) return
       nextTick(() => {
-        const url = location.origin + to.fullPath
-        window.ym?.(id, 'hit', url, { title: document.title, referer: prev })
-        prev = url
+        const url = location.origin + to.path
+        if (url === previous) return
+        window.ym?.(id, 'hit', url, { title: document.title, referer: previous }); previous = url
       })
     })
   }
-
-  // Сохраняем UTM с первого захода - уйдут вместе с заявкой
-  const q = router.currentRoute.value.query
-  const utm = Object.fromEntries(Object.entries(q).filter(([k]) => k.startsWith('utm_') || k === 'yclid'))
-  if (Object.keys(utm).length) {
-    try { sessionStorage.setItem('utm', JSON.stringify(utm)) } catch {}
-  }
-
-  return {
-    provide: {
-      ymGoal: (goal: string, params?: Record<string, unknown>) => {
-        if (id) window.ym?.(id, 'reachGoal', goal, params)
-      }
-    }
-  }
+  const utm = Object.fromEntries(Object.entries(router.currentRoute.value.query).filter(([k]) => ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','yclid'].includes(k)))
+  if (Object.keys(utm).length) try { sessionStorage.setItem('utm', JSON.stringify(utm)) } catch {}
+  return { provide: { ymGoal: (goal: string) => { if (id && !admin(router.currentRoute.value.path)) window.ym?.(id, 'reachGoal', goal) } } }
 })

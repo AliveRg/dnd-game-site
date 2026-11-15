@@ -1,4 +1,6 @@
 import { seedGames } from '../data/games'
+import { ARTICLES, fillCity } from '../../shared/seo-pages'
+import { referenceDrafts } from '../data/reference-drafts'
 
 // Создаёт таблицы при старте и заливает стартовые сюжеты, если таблица пустая.
 export default defineNitroPlugin(async () => {
@@ -53,22 +55,70 @@ export default defineNitroPlugin(async () => {
         status       TEXT NOT NULL DEFAULT 'new',          -- new | confirmed | cancelled
         created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
       );
-      -- бросок d20 при записи
+      ALTER TABLE bookings ADD COLUMN IF NOT EXISTS viewed_at TIMESTAMPTZ;
+      ALTER TABLE bookings ADD COLUMN IF NOT EXISTS admin_note TEXT NOT NULL DEFAULT '';
+      ALTER TABLE bookings ADD COLUMN IF NOT EXISTS source TEXT NOT NULL DEFAULT 'extended';
+      ALTER TABLE bookings ADD COLUMN IF NOT EXISTS request_id UUID;
+      ALTER TABLE bookings ADD COLUMN IF NOT EXISTS request_hash TEXT;
+      CREATE UNIQUE INDEX IF NOT EXISTS bookings_request_id_idx ON bookings(request_id) WHERE request_id IS NOT NULL;
+      CREATE INDEX IF NOT EXISTS bookings_created_idx ON bookings(created_at DESC);
+      CREATE TABLE IF NOT EXISTS admin_sessions (id UUID PRIMARY KEY, expires_at TIMESTAMPTZ NOT NULL);
+      CREATE TABLE IF NOT EXISTS schema_migrations (name TEXT PRIMARY KEY, applied_at TIMESTAMPTZ NOT NULL DEFAULT now());
+      CREATE TABLE IF NOT EXISTS site_content (
+        section TEXT PRIMARY KEY,
+        content JSONB NOT NULL DEFAULT '{}'::jsonb,
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS media_assets (
+        key TEXT PRIMARY KEY, mime TEXT NOT NULL, width INTEGER, height INTEGER,
+        alt TEXT NOT NULL DEFAULT '', created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+      -- Сохраняем исторические броски
       ALTER TABLE bookings ADD COLUMN IF NOT EXISTS roll INTEGER;
       ALTER TABLE bookings ADD COLUMN IF NOT EXISTS bonus BOOLEAN NOT NULL DEFAULT false;
     `)
 
-    const { rows } = await db.query(`SELECT count(*)::int AS n FROM posts WHERE type = 'game'`)
-    if (rows[0].n === 0) {
-      for (const g of seedGames) {
-        await db.query(
-          `INSERT INTO posts (type, slug, title, excerpt, body, cover, meta, seo_title, seo_description)
-           VALUES ('game', $1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT (slug) DO NOTHING`,
-          [g.slug, g.title, g.excerpt, g.body, g.cover ?? null, JSON.stringify(g.meta), g.seoTitle, g.seoDescription]
-        )
+    const seedClient = await db.connect()
+    try {
+      await seedClient.query('BEGIN')
+      await seedClient.query("SELECT pg_advisory_xact_lock(81624190)")
+      const applied = await seedClient.query("SELECT 1 FROM schema_migrations WHERE name='seed-games-v1'")
+      if (!applied.rowCount) {
+        const { rows } = await seedClient.query("SELECT count(*)::int AS n FROM posts WHERE type='game'")
+        if (rows[0].n === 0) {
+          for (const g of seedGames) {
+            await seedClient.query(
+              `INSERT INTO posts (type, slug, title, excerpt, body, cover, meta, seo_title, seo_description)
+               VALUES ('game',$1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(slug) DO NOTHING`,
+              [g.slug,g.title,g.excerpt,g.body,g.cover??null,JSON.stringify(g.meta),g.seoTitle,g.seoDescription]
+            )
+          }
+        }
+        await seedClient.query("INSERT INTO schema_migrations(name) VALUES('seed-games-v1')")
       }
-      console.log(`[db] залито стартовых сюжетов: ${seedGames.length}`)
-    }
+      const articleSeed = await seedClient.query("SELECT 1 FROM schema_migrations WHERE name='seed-articles-v1'")
+      if (!articleSeed.rowCount) {
+        const cfg=useRuntimeConfig().public
+        const fill=(text:string)=>fillCity(text,String(cfg.cityIn),String(cfg.city))
+        for (const article of ARTICLES) {
+          const body=[article.intro,...article.sections.map(section=>[section.h2,section.text,...(section.list??[])].join('\n')),...(article.faq??[]).map(item=>`${item.q}\n${item.a}`)].join('\n\n')
+          await seedClient.query(`INSERT INTO posts(type,slug,title,excerpt,body,seo_title,seo_description,published) VALUES('article',$1,$2,$3,$4,$5,$6,true) ON CONFLICT(slug) DO NOTHING`,[article.slug,fill(article.h1),fill(article.description),body.replaceAll('{city}',String(cfg.cityIn)).replaceAll('{cityName}',String(cfg.city)),fill(article.title),fill(article.description)])
+        }
+        await seedClient.query("INSERT INTO schema_migrations(name) VALUES('seed-articles-v1')")
+      }
+      const referenceSeed=await seedClient.query("SELECT 1 FROM schema_migrations WHERE name='seed-reference-drafts-v1'")
+      if (!referenceSeed.rowCount) {
+        for(const draft of referenceDrafts) {
+          const meta={category:draft.category,edition:draft.edition,sources:draft.sources,wordstatVerified:false}
+          await seedClient.query(`INSERT INTO posts(type,slug,title,excerpt,body,meta,published) VALUES('reference',$1,$2,$3,$4,$5,false) ON CONFLICT(slug) DO NOTHING`,[draft.slug,draft.title,draft.excerpt,draft.body,JSON.stringify(meta)])
+        }
+        await seedClient.query("INSERT INTO schema_migrations(name) VALUES('seed-reference-drafts-v1')")
+      }
+      await seedClient.query('COMMIT')
+    } catch (e) {
+      await seedClient.query('ROLLBACK')
+      throw e
+    } finally { seedClient.release() }
     console.log('[db] миграции ок')
   } catch (e: any) {
     console.error('[db] ошибка миграции:', e.message)

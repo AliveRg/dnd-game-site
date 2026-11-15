@@ -2,7 +2,7 @@
 const route = useRoute()
 const cfg = useRuntimeConfig().public
 const { data: post, error } = await useFetch<any>(`/api/posts/${route.params.slug}`)
-if (error.value || !post.value) throw createError({ statusCode: 404, message: 'Запись не найдена', fatal: true })
+if (error.value || !post.value || !['news','novelty'].includes(post.value.type)) throw createError({ statusCode: 404, message: 'Запись не найдена', fatal: true })
 useSiteSeo({ title: post.value.seo_title || `${post.value.title} | ${cfg.siteName}`, description: post.value.seo_description || post.value.excerpt, image: post.value.cover || undefined, type: 'article' })
 const paragraphs = computed(() => String(post.value.body || '').split(/\n{2,}/))
 </script>

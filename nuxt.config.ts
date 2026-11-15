@@ -42,7 +42,7 @@ export default defineNuxtConfig({
     sessionPassword: '',
 
     public: {
-      siteUrl: 'http://localhost:3000',
+      siteUrl: 'https://dungeons-bgd.ru',
       siteName: 'Хижина Всякой Всячины',
       // Город в предложном падеже для SEO-заголовков
       cityIn: 'в Белгороде',
@@ -50,9 +50,9 @@ export default defineNuxtConfig({
       // 'false' - сайт закрыт от индексации (пока работает на техническом домене Timeweb). Купили домен → 'true'
       indexable: 'false',
       // Бросок d20 после заявки: 20 = бонус (один раз на контакт). Выключить: NUXT_PUBLIC_DICE_BONUS=false
-      diceBonus: 'true',
+      diceBonus: 'false',
       diceBonusText: 'чай и печенье за счёт Хижины',
-      yandexMetrikaId: ''
+      yandexMetrikaId: '114256712'
     }
   },
 
@@ -74,10 +74,14 @@ export default defineNuxtConfig({
   routeRules: {
     // объединённые страницы - старые адреса ведут на новые (301, для SEO)
     '/o-klube': { redirect: { to: '/klub', statusCode: 301 } },
-    '/stati': { redirect: { to: '/klub#stati', statusCode: 301 } },
+
     '/news': { redirect: { to: '/klub#novosti', statusCode: 301 } },
     '/karta': { redirect: { to: '/games#karta', statusCode: 301 } },
-    '/ceny': { redirect: { to: '/raspisanie', statusCode: 301 } },
+    '/ceny': { redirect: { to: '/#booking', statusCode: 301 } },
+    '/raspisanie': { redirect: { to: '/#booking', statusCode: 301 } },
+    '/generator-geroya': { redirect: { to: '/spravochnik', statusCode: 301 } },
+    '/dragons/sw.js': { headers: { 'Service-Worker-Allowed': '/dragons', 'Cache-Control': 'no-cache' } },
+    '/dragons': { ssr: false, headers: { 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'no-store' } },
     '/dragons/**': { ssr: false, headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
     '/api/admin/**': { headers: { 'X-Robots-Tag': 'noindex' } },
     '/images/**': { headers: { 'Cache-Control': assetCache } },
@@ -86,8 +90,8 @@ export default defineNuxtConfig({
     '/cards/**': { headers: { 'Cache-Control': assetCache } },
     '/ui/**': { headers: { 'Cache-Control': assetCache } },
     // список сюжетов меняется редко - кэш на сервере 60 с (меньше запросов к БД)
-    '/api/games': { swr: 60 },
-    '/sitemap.xml': { swr: 3600 },
+
+
     '/fonts/**': { headers: { 'Cache-Control': 'public, max-age=31536000, immutable' } },
     '/media/**': { headers: { 'Cache-Control': 'public, max-age=2592000' } }
   },
