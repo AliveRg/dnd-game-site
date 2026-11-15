@@ -2,6 +2,8 @@
 
 Nuxt 4 · Vue 3 · Tailwind 4 · PostgreSQL · S3 · Docker (Timeweb App Platform)
 
+[Совместная работа, ветки и выборочный выпуск](docs/COLLABORATION.md)
+
 ## Быстрый старт (локально)
 
 ```bash
