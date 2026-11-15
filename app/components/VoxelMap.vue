@@ -160,7 +160,7 @@ async function init() {
   const g = document.createElement('canvas'); g.width = g.height = 256
   const gx = g.getContext('2d')!
   const grad = gx.createRadialGradient(128, 128, 40, 128, 128, 128)
-  grad.addColorStop(0, 'rgba(22,52,64,1)'); grad.addColorStop(0.7, 'rgba(26,20,30,.85)'); grad.addColorStop(1, 'rgba(10,2,2,0)')
+  grad.addColorStop(0, 'rgba(30,62,70,1)'); grad.addColorStop(0.7, 'rgba(24,22,18,.85)'); grad.addColorStop(1, 'rgba(16,9,4,0)')
   gx.fillStyle = grad; gx.fillRect(0, 0, 256, 256)
   const tex = new T.CanvasTexture(g); tex.colorSpace = T.SRGBColorSpace
   const sea = new T.Mesh(new T.PlaneGeometry(1, 1), new T.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }))
@@ -264,6 +264,9 @@ onBeforeUnmount(() => {
 .voxel-canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; display: block; touch-action: manipulation;
   opacity: 0; transition: opacity .6s; }
 .is-ready .voxel-canvas { opacity: 1; }
+/* края холста растворяются: море не обрезается прямой линией */
+.voxel-canvas { -webkit-mask: linear-gradient(90deg, #0000, #000 7%, #000 93%, #0000), linear-gradient(180deg, #0000, #000 8%, #000 92%, #0000); -webkit-mask-composite: source-in;
+  mask: linear-gradient(90deg, #0000, #000 7%, #000 93%, #0000), linear-gradient(180deg, #0000, #000 8%, #000 92%, #0000); mask-composite: intersect; }
 .voxel-skel { position: absolute; inset: 18% 14%; display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
 .voxel-skel span { aspect-ratio: 1.15; background: #ece6d814; clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
   animation: vx-pulse 1.4s ease-in-out infinite; animation-delay: calc(var(--i) * .08s); }

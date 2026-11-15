@@ -26,6 +26,8 @@ async function go() {
   setTimeout(() => (flipped.value = true), 450)
 }
 function close() { open.value = false }
+// закрыть окно и плавно доехать до записи (у ссылок-якорей клик перехватывает общий скролл, поэтому кнопка)
+function book() { close(); nextTick(() => scrollToEl('#booking')) }
 onMounted(() => window.addEventListener('keydown', (e) => e.key === 'Escape' && close()))
 const verdict = computed(() => (result.value === 20 ? 'Критический успех!' : result.value === 1 ? 'Провал… но судьба даёт шанс' : `Выпало ${result.value}`))
 </script>
@@ -57,12 +59,12 @@ const verdict = computed(() => (result.value === 20 ? 'Критический у
                 <span v-if="game.meta?.adult" class="fate-tag !bg-blood">18+</span>
               </div>
             </TarotCard>
-            <!-- «?» - подробнее о сюжете: маленькая золотая кнопка над картой, не спорит с «Записаться» -->
+            <!-- «?» - подробнее о сюжете: золотая плашка внутри карты, в правом верхнем углу -->
             <NuxtLink v-show="flipped" :to="`/games/${game.slug}`" class="fate-more" title="Подробнее о сюжете" aria-label="Подробнее о сюжете" @click="close">?</NuxtLink>
             </div>
             <div class="flex flex-wrap justify-center gap-3">
               <button class="btn-ghost" @click="go"><img src="/art/decor-dice.webp" alt="" class="h-6 w-6 object-contain" />Бросить ещё</button>
-              <NuxtLink to="#booking" class="btn-primary" @click="close">Записаться</NuxtLink>
+              <button type="button" class="btn-primary" @click="book">Записаться</button>
             </div>
             <button class="fate-close" @click="close">Закрыть</button>
           </div>
@@ -73,10 +75,10 @@ const verdict = computed(() => (result.value === 20 ? 'Критический у
 </template>
 
 <style>
-.fate-more { position: absolute; top: -12px; right: -12px; z-index: 2; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%;
-  font-family: var(--font-display); font-size: 20px; font-weight: 700; color: #100904; background: radial-gradient(circle at 35% 30%, #f3e6c8, #e0a24a 55%, #7e4515);
-  box-shadow: 0 0 0 2px #100904, 0 0 0 3px #e0a24a77, 0 4px 10px #000a; opacity: .82; transition: opacity .2s, transform .2s, box-shadow .2s; animation: fate-more-in .4s .5s both; }
-.fate-more:hover { opacity: 1; transform: scale(1.08); box-shadow: 0 0 0 2px #100904, 0 0 0 3px #f6c873, 0 0 16px #e0a24aaa; }
+.fate-more { position: absolute; top: 18px; right: 18px; z-index: 2; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px;
+  font-family: var(--font-display); font-size: 21px; font-weight: 700; color: #2f190a; background: linear-gradient(180deg, #f6c873, #e0a24a 55%, #b16f23);
+  box-shadow: inset 0 1px 0 #fff8, 0 2px 0 #5a3010, 0 4px 10px #0006; transition: transform var(--t-fast) var(--ease), filter var(--t) var(--ease); animation: fate-more-in .4s .5s both; }
+.fate-more:hover { filter: brightness(1.1); transform: translateY(-1px); }
 @keyframes fate-more-in { from { opacity: 0; transform: scale(.5); } }
 .fate-close { font-size: 14px; color: #b3a285; text-decoration: underline; text-underline-offset: 3px; transition: color .2s, text-shadow .2s; }
 .fate-close:hover { color: #fff; text-shadow: 0 0 10px #ffffff66; }

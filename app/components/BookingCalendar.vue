@@ -162,16 +162,20 @@ async function submit() {
           v-for="s in daySessions"
           :key="s.id"
           type="button"
-          class="w-full rounded-xl border p-4 text-left transition"
+          class="flex w-full items-center gap-4 rounded-xl border p-4 text-left transition"
           :class="s.seats_left === 0 ? 'cursor-not-allowed border-[#b3a28555] opacity-70' : selected?.id === s.id ? 'border-candle bg-candle/10' : 'border-wood-2 hover:border-candle/60'"
           :disabled="s.seats_left === 0"
           @click="selected = s"
         >
-          <div class="flex items-center justify-between">
-            <span class="font-semibold">{{ fmtTime(s.starts_at) }} · {{ s.game_title || 'Партия' }}</span>
-            <span v-if="s.is_weekly" class="badge">История недели</span>
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-semibold">{{ fmtTime(s.starts_at) }} · {{ s.game_title || 'Партия' }}</span>
+              <span v-if="s.is_weekly" class="badge">История недели</span>
+            </div>
+            <p class="mt-1 text-sm text-ash">{{ Number(s.duration_h) }} ч · {{ s.price }} ₽ · <template v-if="s.seats_left">свободно мест: <b class="text-candle">{{ s.seats_left }}</b> из {{ s.max_players }}</template><b v-else class="text-[#b3a285]">мест нет, стол собран</b></p>
           </div>
-          <p class="mt-1 text-sm text-ash">{{ Number(s.duration_h) }} ч · {{ s.price }} ₽ · <template v-if="s.seats_left">свободно мест: <b class="text-candle">{{ s.seats_left }}</b> из {{ s.max_players }}</template><b v-else class="text-[#b3a285]">мест нет, стол собран</b></p>
+          <!-- картинка мира этой истории -->
+          <GameIcon :slug="s.game_slug" :width="96" class="h-16 w-24 flex-none object-contain" />
         </button>
       </div>
     </div>

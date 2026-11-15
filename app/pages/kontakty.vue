@@ -15,9 +15,9 @@ useSiteSeo({ title: `Контакты - клуб НРИ ${cfg.cityIn}`, descript
         <li class="contact-row"><img src="/art/ui-telegram.webp" alt="" /><span><b>Telegram</b>скоро здесь</span></li>
         <li class="contact-row"><img src="/art/ui-vk.webp" alt="" /><span><b>ВКонтакте</b>скоро здесь</span></li>
       </ul>
-      <div class="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,28rem)_1fr]">
+      <div class="mt-8 grid items-start gap-6 lg:grid-cols-[minmax(0,28rem)_minmax(0,1fr)]">
         <QuickForm />
-        <img src="/photos/room.webp" alt="Игровая комната клуба" class="photo-neon aspect-[3/4] w-full max-w-sm justify-self-center object-cover lg:justify-self-end" loading="lazy" decoding="async" />
+        <img src="/photos/room.webp" alt="Игровая комната клуба" class="photo-neon aspect-[16/11] w-full object-cover object-[50%_62%]" loading="lazy" decoding="async" />
       </div>
     </div>
   </section>

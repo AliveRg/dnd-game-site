@@ -41,8 +41,8 @@ function onClick(e: MouseEvent) {
         <GameIcon :slug="game.slug" :width="200" class="sc-art" />
         <p v-if="m.series" class="mt-1 text-[10px] font-bold uppercase tracking-[.18em] text-candle">{{ m.series }}</p>
         <h3 class="mt-0.5 text-[24px] leading-none">{{ shortTitle(game.title, m.series) }}</h3>
-        <p class="mt-2 line-clamp-2 text-[13px] leading-relaxed text-[#d6c6a6]">{{ game.excerpt }}</p>
-        <div class="relative z-[1] mt-auto flex justify-end pt-2"><NuxtLink :to="`/games/${game.slug}`" class="sc-more">Подробнее</NuxtLink></div>
+        <p class="mt-2 line-clamp-2 px-1 text-[13px] leading-relaxed text-[#d6c6a6]">{{ game.excerpt }}</p>
+        <div class="relative z-[1] mt-auto flex justify-center pt-2"><NuxtLink :to="`/games/${game.slug}`" class="sc-more">Подробнее</NuxtLink></div>
       </div>
     </TarotCard>
   </div>
@@ -50,7 +50,9 @@ function onClick(e: MouseEvent) {
 
 <style>
 .story-card { cursor: pointer; padding: 0 6px; }
-.story-card .tarot-content { padding: 20px 14px 14px 22px; }
+.story-card .tarot-content { padding: 20px 20px 16px; }
+/* медальон формата сидит в правом верхнем углу внутри рамки */
+.story-card .vc-orb { top: 13px; right: 13px; width: 34px; height: 34px; font-size: 11px; border-width: 1.5px; }
 .sc-kind { align-self: center; padding: 3px 10px; border-radius: 99px; font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #2f190a; background: var(--gold); box-shadow: inset 0 1px 0 #fff6; }
 .sc-art { width: 92%; height: auto; margin: 2px auto 0; aspect-ratio: 3 / 2; transition: transform var(--t-slow) var(--ease); }
 .story-card:hover .sc-art { transform: scale(1.05) translateY(-2px); }

@@ -45,19 +45,20 @@ useHead({
     <section class="relative flex min-h-[calc(100dvh-72px)] items-center overflow-hidden">
       <HeroSlides />
       <div class="container-x relative grid items-start gap-8 py-10 md:py-12 lg:grid-cols-[1.2fr_1fr]">
-        <!-- Главный текст в своей рамке -->
-        <div class="hero-frame">
+        <!-- Главный текст свободно, а «Доверься судьбе» - в рамке под ним -->
+        <div>
           <span class="badge mb-4">Акция · партия 4 часа - 2 000 ₽</span>
-          <h1 class="text-4xl md:text-6xl" style="line-height: 1">Клуб настольных ролевых игр D&amp;D{{ city }}</h1>
-          <p class="mt-5 max-w-xl text-lg text-parchment/85">
+          <h1 class="text-4xl md:text-6xl" style="line-height: 1; text-shadow: 0 2px 12px #000, 0 0 22px #e0a24a33">Клуб настольных ролевых игр D&amp;D{{ city }}</h1>
+          <p class="mt-5 max-w-xl text-lg text-parchment/90" style="text-shadow: 0 1px 8px #000">
             Уникальные сюжеты и миры, живой мастер и до 5 игроков за столом. Каждую неделю - новая история в новом сеттинге.
           </p>
           <div class="mt-6 flex flex-wrap justify-end gap-3">
             <NuxtLink to="/games" class="btn-ghost">Смотреть сюжеты</NuxtLink>
             <NuxtLink to="#booking" class="btn-primary">Выбрать дату</NuxtLink>
           </div>
-          <div class="hero-frame-sep" />
-          <FateRoll />
+          <div class="hero-frame mt-8">
+            <FateRoll />
+          </div>
         </div>
         <div class="flex lg:justify-end">
           <!-- череп сидит на правом нижнем углу формы: угол - в центре картинки -->

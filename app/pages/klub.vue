@@ -16,9 +16,11 @@ const rules = ['Уважаем других игроков и их время', 
   <div>
     <!-- О клубе -->
     <section id="o-klube" class="section">
-      <div class="container-x grid items-start gap-8 lg:grid-cols-[1.4fr_1fr]">
+      <div class="container-x">
+      <SectionTitle icon="candle" as="h1">О клубе</SectionTitle>
+      <!-- правила стола начинаются на одной линии с первым абзацем -->
+      <div class="grid items-start gap-8 lg:grid-cols-[1.4fr_1fr]">
         <div>
-          <SectionTitle icon="candle" as="h1">О клубе</SectionTitle>
           <p class="text-lg text-parchment/85">{{ cfg.siteName }} - клуб настольных ролевых игр {{ cfg.cityIn }}. Мастер готовит историю заранее, а вы просто приходите: кубики, листы персонажей, карты и миниатюры уже ждут на столе. <!-- TODO: текст заказчика --></p>
           <h3 class="mt-6 text-2xl">Мастер</h3>
           <div class="mt-3 flex flex-col gap-5 sm:flex-row">
@@ -33,6 +35,7 @@ const rules = ['Уважаем других игроков и их время', 
           </ul>
           <div class="mt-5 flex justify-end"><NuxtLink to="/kontakty" class="btn-ghost">Как нас найти</NuxtLink></div>
         </div>
+      </div>
       </div>
     </section>
 

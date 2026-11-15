@@ -79,19 +79,58 @@ const roles = computed(() => {
     { name: 'Танк', v: Math.max(0.04, Math.min(1, n(h.scores.con) * 0.5 + ((h.ac - 10) / 10) * 0.5)) }
   ]
 })
-const heroText = computed(() => {
+// Печать: отдельная страница с компактным листом на один А4 (светлый фон, тёмный текст)
+const esc = (v: unknown) => String(v ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!)
+function printSheet() {
   const h = hero.value
-  if (!h) return ''
-  return `Мой герой: ${h.name} (${h.species}, ${h.klass}, ${h.background}), ${RARITY[h.rarity].name.toLowerCase()}. ` +
-    ABILITIES.map((a) => `${a.short} ${h.scores[a.id]}`).join(', ') + `; КД ${h.ac}, хиты ${h.hp}.`
-})
-function bookWithHero() {
-  if (!hero.value) return
-  try { sessionStorage.setItem('hero', heroText.value) } catch {}
-  window.dispatchEvent(new CustomEvent('hero-ready', { detail: heroText.value }))
-  scrollToEl('#booking')
+  if (!h) return
+  const li = (a: string[]) => a.map((x) => `<li>${esc(x)}</li>`).join('')
+  const abil = ABILITIES.map((a) => `<div class="ab"><small>${a.name}</small><b>${fmt(h.mods[a.id])}</b><i>${h.scores[a.id]}</i></div>`).join('')
+  const saves = h.saves.map((x) => `<li><span class="dot${x.prof ? ' on' : ''}"></span><b>${fmt(x.val)}</b> ${esc(ABILITIES.find((a) => a.id === x.ab)!.name)}</li>`).join('')
+  const skills = h.skills.map((x) => `<li><span class="dot${x.prof ? ' on' : ''}${x.expert ? ' ex' : ''}"></span><b>${fmt(x.val)}</b> ${esc(x.name)} <em>${abilityShort(x.ab)}</em></li>`).join('')
+  const atk = h.attacks.map((a) => `<tr><td>${esc(a.name)}${a.note ? `<em> ${esc(a.note)}</em>` : ''}</td><td><b>${esc(a.bonus)}</b></td><td>${esc(a.dmg)}</td></tr>`).join('')
+  const spell = h.spell ? `<section><h4>Заклинания · ${esc(h.spell.label)} · Сл ${h.spell.dc} · атака ${fmt(h.spell.atk)} · ячеек 1 круга: ${h.spell.slots}</h4>
+    <p><b>Заговоры:</b> ${esc(h.spell.cantrips.join(', ') || '-')}</p><p><b>1 круг:</b> ${esc(h.spell.spells.join(', '))}</p></section>` : ''
+  const html = `<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>${esc(h.name)} - лист героя</title><style>
+  @page { size: A4; margin: 9mm; }
+  * { box-sizing: border-box; } body { margin: 0; font: 10px/1.36 Georgia, 'Times New Roman', serif; color: #1d1107; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  h1 { margin: 0; font-size: 22px; } h4 { margin: 0 0 3px; font: 700 8px Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #7e4515; border-bottom: 1px solid #b16f23; padding-bottom: 2px; }
+  .top { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #7e4515; padding-bottom: 4px; }
+  .meta { font: 10px Arial, sans-serif; } .rar { font: 700 9px Arial, sans-serif; padding: 2px 8px; border: 1px solid #7e4515; border-radius: 99px; }
+  .vit { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin: 6px 0; }
+  .vit div { border: 1px solid #b16f23; border-radius: 5px; text-align: center; padding: 3px 2px; } .vit b { display: block; font-size: 15px; } .vit small, .ab small { font: 7px Arial, sans-serif; text-transform: uppercase; letter-spacing: .06em; color: #6b4a24; }
+  .grid { display: grid; grid-template-columns: 70px 150px 1fr; gap: 8px; }
+  .ab { border: 1px solid #b16f23; border-radius: 6px; text-align: center; padding: 3px; margin-bottom: 4px; } .ab b { display: block; font-size: 16px; } .ab i { font-style: normal; font: 700 9px Arial; }
+  ul { list-style: none; margin: 0; padding: 0; } li { padding: .6px 0; } .dot { display: inline-block; width: 7px; height: 7px; border: 1px solid #1d1107; border-radius: 50%; margin-right: 3px; vertical-align: -1px; } .dot.on { background: #1d1107; } .dot.ex { background: #b16f23; border-color: #b16f23; }
+  em { font-style: normal; color: #8a6a40; font-size: 8px; } section { margin-bottom: 6px; } p { margin: 0 0 2px; }
+  table { width: 100%; border-collapse: collapse; } td { border-bottom: 1px solid #e2cfa6; padding: 1.5px 2px; vertical-align: top; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .foot { margin-top: 4px; font: 8px Arial; color: #8a6a40; text-align: right; }
+  </style></head><body>
+  <div class="top"><div><h1>${esc(h.name)}</h1><div class="meta">${esc(h.klass)} · ${esc(h.species)} · ${esc(h.background)} · ${esc(h.alignment)} · 1 уровень · опыт ${esc(h.xp)}</div></div><span class="rar">${RARITY[h.rarity].name} герой · d20 = ${h.d20}</span></div>
+  <div class="vit"><div><b>${h.ac}</b><small>КД</small></div><div><b>${h.hp}</b><small>Хиты</small></div><div><b>${fmt(h.init)}</b><small>Инициатива</small></div><div><b>${h.speed} фт</b><small>Скорость</small></div>
+    <div><b>${fmt(h.prof)}</b><small>Мастерство</small></div><div><b>${h.passive}</b><small>Пасс. внимат.</small></div><div><b>${esc(h.hd)}</b><small>Кости хитов</small></div><div><b>${h.inspiration ? '★' : '-'}</b><small>Вдохновение</small></div></div>
+  <div class="grid">
+    <div>${abil}</div>
+    <div><section><h4>Спасброски</h4><ul>${saves}</ul></section><section><h4>Навыки</h4><ul>${skills}</ul></section></div>
+    <div>
+      <section><h4>Атаки</h4><table>${atk}</table></section>
+      <section><h4>Действия</h4><p><b>Действие:</b> ${esc(h.actions.action.join(', '))}</p><p><b>Бонусное:</b> ${esc(h.actions.bonus.join(', ') || '-')}</p><p><b>Реакция:</b> ${esc(h.actions.reaction.join(', '))}</p></section>
+      <section><h4>Умения и черты</h4><ul>${li(h.features)}</ul></section>
+      ${h.boons.length ? `<section><h4>Благословения</h4><ul>${li(h.boons)}</ul></section>` : ''}
+      ${spell}
+      <div class="two"><section><h4>Снаряжение</h4><ul>${li(h.equipment)}</ul><p>${h.coins.mm} ММ · ${h.coins.sm} СМ · ${h.coins.zm} ЗМ · ${h.coins.pm} ПМ</p></section>
+      <section><h4>Владения и языки</h4><p>${esc(h.proficiencies)}</p><p><b>Языки:</b> ${esc(h.languages.join(', '))}</p></section></div>
+      <section><h4>Внешность</h4><p>${esc(h.look)}</p></section>
+      <section><h4>Предыстория</h4><p>${esc(h.story)}</p></section>
+    </div>
+  </div>
+  <div class="foot">Хижина Всякой Всячины · генератор героя D&amp;D 5e</div>
+  <script>window.onload = () => { window.print(); setTimeout(() => window.close(), 300) }<\/script>
+  </body></html>`
+  const w = window.open('', '_blank', 'width=900,height=1200')
+  if (!w) return
+  w.document.open(); w.document.write(html); w.document.close()
 }
-const printSheet = () => window.print()
 const initials = (n: string) => { const w = n.replace(/[«»"]/g, '').split(/\s+/).filter(Boolean); return ((w[0]?.[0] ?? '') + (w.length > 1 ? w[w.length - 1]![0] : '')).toUpperCase() }
 const skillsOf = computed(() => hero.value?.skills ?? SKILLS.map((s) => ({ ...s, prof: false, expert: false, val: 0 })))
 </script>
@@ -107,7 +146,7 @@ const skillsOf = computed(() => hero.value?.skills ?? SKILLS.map((s) => ({ ...s,
       <div class="flex min-w-0 flex-1 flex-col gap-4">
         <div class="flex flex-wrap items-center gap-3">
           <button type="button" class="hg-roll" :disabled="rolling" @click="roll">
-            <img src="/art/decor-dice.webp" alt="" class="hg-roll-ico" :class="rolling && 'spin'" />{{ rolling ? 'Кости катятся…' : hero ? 'Перебросить героя' : 'Бросить кости' }}
+            <img src="/art/decor-dice.webp" alt="" class="hg-roll-ico" />{{ rolling ? 'Кости катятся…' : hero ? 'Перебросить героя' : 'Бросить кости' }}
           </button>
           <p class="text-sm text-ash">4d6, меньший кубик отбрасывается, ×6. Выпавшее нельзя править - только перебросить.</p>
         </div>
@@ -344,8 +383,7 @@ const skillsOf = computed(() => hero.value?.skills ?? SKILLS.map((s) => ({ ...s,
     </article>
 
     <div class="mt-6 flex flex-wrap justify-end gap-3 border-t border-[#e0a24a44] pt-5">
-      <button type="button" class="btn-ghost" :disabled="!hero" @click="printSheet">Распечатать лист</button>
-      <button type="button" class="btn-primary" :disabled="!hero" @click="bookWithHero">Записаться этим героем</button>
+      <button type="button" class="btn-primary" :disabled="!hero" @click="printSheet">Распечатать лист</button>
     </div>
   </div>
 </template>
@@ -365,7 +403,7 @@ const skillsOf = computed(() => hero.value?.skills ?? SKILLS.map((s) => ({ ...s,
 .hg-roll:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.08); box-shadow: inset 0 1px 0 #fff6, 0 6px 0 #5a3010, 0 0 34px #e0a24a99; }
 .hg-roll:active:not(:disabled) { transform: translateY(2px); box-shadow: inset 0 1px 0 #fff6, 0 1px 0 #5a3010; }
 .hg-roll:disabled { filter: saturate(.6); cursor: progress; }
-.hg-roll-ico { display: inline-block; width: 30px; height: 30px; object-fit: contain; } .hg-roll-ico.spin { animation: hg-spin .5s linear infinite; }
+.hg-roll-ico { display: inline-block; width: 30px; height: 30px; object-fit: contain; }
 @keyframes hg-spin { to { transform: rotate(360deg); } }
 .hg-odds { position: relative; display: flex; height: 28px; margin-bottom: 12px; border-radius: 10px; overflow: visible; font-size: 11px; font-weight: 800; color: #100904; }
 .hg-odds > span { display: grid; place-items: center; white-space: nowrap; overflow: hidden; box-shadow: inset 0 -3px 0 #0003; }
@@ -496,11 +534,5 @@ const skillsOf = computed(() => hero.value?.skills ?? SKILLS.map((s) => ({ ...s,
 .hs-title { font: 700 30px/1 var(--font-display); padding-bottom: 10px; border-bottom: 1px solid #e0a24a44; text-shadow: 0 0 16px #e0a24a77; }
 .hs-slot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #e0a24a; box-shadow: 0 0 8px #e0a24a; }
 
-@media print {
-  body * { visibility: hidden !important; }
-  .hs-print, .hs-print * { visibility: visible !important; }
-  .hs-print { position: relative; box-shadow: none !important; break-inside: avoid; page-break-after: always; }
-  .hs-reroll { display: none !important; }
-}
 @media (prefers-reduced-motion: reduce) { .hs-in, .hs-ab.rolling *, .hg-flare { animation: none !important; } }
 </style>

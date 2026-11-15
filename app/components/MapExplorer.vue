@@ -94,7 +94,7 @@ watch([selectedId, hoverId], () => nextTick(() => { const id = hoverId.value ?? 
 </template>
 
 <style>
-.map-label { position: absolute; transform: translate(-50%, -50%); pointer-events: none; white-space: nowrap; padding: 5px 12px; border-radius: 8px;
+.map-label { position: absolute; z-index: 2; transform: translate(-50%, calc(-100% - 64px)); pointer-events: none; white-space: nowrap; padding: 5px 12px; border-radius: 8px;
   font-family: var(--font-display); font-size: 18px; line-height: 1; color: #f3e6c8; background: #100904e6; border: 1px solid #e0a24a99; box-shadow: 0 6px 16px #000a; }
 .zone-list { max-height: 560px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #5a3416 transparent; display: flex; flex-direction: column; gap: 2px; }
 .zone-item { display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 10px; text-align: left; border: 1px solid transparent;
