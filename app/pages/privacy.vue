@@ -37,14 +37,14 @@ useHead({ meta: [{ name: 'robots', content: 'noindex, follow' }] })
 </template>
 
 <style>
-.doc-tab { padding: 10px 16px; border-radius: 10px; font-weight: 600; font-size: 15px; color: #F7F2E6; border: 1px solid #4a1010;
+.doc-tab { padding: 10px 16px; border-radius: 10px; font-weight: 600; font-size: 15px; color: #f3e6c8; border: 1px solid #5a3416;
   background: var(--panel); transition: border-color .25s, box-shadow .25s, color .25s; }
-.doc-tab:hover { border-color: #DF0000aa; box-shadow: 0 0 16px #DF000044; }
-.doc-tab.on { color: #040404; border-color: #ff8a7a; background: linear-gradient(180deg, #fff3, #0000 45%, #0002), var(--gold); box-shadow: inset 0 1px 0 #fff7, 0 0 18px #DF000044; }
+.doc-tab:hover { border-color: #e0a24aaa; box-shadow: 0 0 16px #e0a24a44; }
+.doc-tab.on { color: #100904; border-color: #f6c873; background: linear-gradient(180deg, #fff3, #0000 45%, #0002), var(--gold); box-shadow: inset 0 1px 0 #fff7, 0 0 18px #e0a24a44; }
 .legal { counter-reset: lg; display: grid; gap: 22px; }
 .legal > li { counter-increment: lg; position: relative; padding-left: 44px; }
 .legal > li::before { content: counter(lg); position: absolute; left: 0; top: 0; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%;
-  font-size: 14px; font-weight: 800; color: #040404; background: var(--gold); box-shadow: inset 0 1px 0 #fff6, 0 2px 6px #0008; }
-.legal h3 { font-size: 22px; line-height: 1.2; color: #F7F2E6; margin-bottom: 6px; }
-.legal p { color: #c9c2b4; line-height: 1.6; margin-top: 6px; }
+  font-size: 14px; font-weight: 800; color: #100904; background: var(--gold); box-shadow: inset 0 1px 0 #fff6, 0 2px 6px #0008; }
+.legal h3 { font-size: 22px; line-height: 1.2; color: #f3e6c8; margin-bottom: 6px; }
+.legal p { color: #d6c6a6; line-height: 1.6; margin-top: 6px; }
 </style>

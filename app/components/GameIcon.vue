@@ -1,20 +1,14 @@
 <script setup lang="ts">
-// Иллюстрация сюжета (широкая, 120×64). Цвет задаётся через color/текстовый класс родителя.
-import { gameIcon } from '#shared/game-icons'
-defineProps<{ slug?: string | null; width?: number }>()
+// Иллюстрация сюжета: расписная диорама мира (public/art/story-*.webp). width - ширина в px; маленькие (<100) берут лёгкую версию.
+import { storyArt } from '#shared/story-art'
+const props = defineProps<{ slug?: string | null; width?: number }>()
+const w = computed(() => props.width || 120)
 </script>
 
 <template>
-  <svg class="game-icon" :width="width || 120" :height="(width || 120) * 64 / 120" viewBox="0 0 120 64" aria-hidden="true" v-html="gameIcon(slug)" />
+  <img class="game-icon" :src="storyArt(slug, w < 100)" alt="" :width="w" :height="Math.round(w * 2 / 3)" loading="lazy" decoding="async" />
 </template>
 
 <style>
-.game-icon { overflow: visible; stroke-linecap: round; stroke-linejoin: round; }
-.game-icon .s { stroke: currentColor; stroke-width: 2; }
-.game-icon path:not([class*='f']), .game-icon .s:not([class*='f']) { fill: none; }
-.game-icon .f1 { fill: currentColor; fill-opacity: .12; }
-.game-icon .f2 { fill: currentColor; fill-opacity: .25; }
-.game-icon .f3 { fill: currentColor; fill-opacity: .45; }
-.game-icon .f4 { fill: #DF0000; fill-opacity: 1; }
-.game-icon path.s:not(.f1):not(.f2):not(.f3):not(.f4) { fill: none; }
+.game-icon { display: block; object-fit: contain; filter: drop-shadow(0 6px 10px #0009); }
 </style>

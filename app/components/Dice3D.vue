@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// 3D-кубик d20 в плоском векторном стиле: красные грани (цвет D&D), ступенчатый свет, тёмный контур.
+// 3D-кубик d20 из модели (орех и латунь) в стиле расписных ассетов клуба.
 // three.js грузится лениво, только в браузере. Если WebGL нет - показываем плоскую картинку.
 // Использование: <Dice3D ref="dice" @click="..." />  →  await dice.value.roll(17)  // или roll() - случайно
 import type * as THREE_NS from 'three'
@@ -22,39 +22,15 @@ let raf = 0
 let visible = true
 let anim: { start: THREE_NS.Quaternion; target: THREE_NS.Quaternion; axis: THREE_NS.Vector3; turns: number; t0: number; dur: number; done: (n: number) => void; n: number } | null = null
 
-// --- атлас граней: 5×4 ячейки, плоский векторный стиль: красная грань, светлая вставка, цифра цвета пергамента ---
-const CELL = 256
-const TRI = { top: [128, 30], bl: [18, 222], br: [238, 222] } as const
-function makeAtlas(numbers: number[]) {
-  const c = document.createElement('canvas')
-  c.width = CELL * 5
-  c.height = CELL * 4
-  const ctx = c.getContext('2d')!
-  const tri = (k: number) => {
-    const cx = 128, cy = 158
-    const p = (q: readonly number[]) => [cx + (q[0] - cx) * k, cy + (q[1] - cy) * k] as const
-    const [a, b, d] = [p(TRI.top), p(TRI.bl), p(TRI.br)]
-    ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(d[0], d[1]); ctx.closePath()
-  }
-  for (let f = 0; f < 20; f++) {
-    ctx.save()
-    ctx.translate((f % 5) * CELL, Math.floor(f / 5) * CELL)
-    ctx.fillStyle = '#c80d0d'; ctx.fillRect(0, 0, CELL, CELL) // корпус: драконий красный, чуть глубже
-    tri(0.78); ctx.fillStyle = '#df1f17'; ctx.fill() // вставка-фаска
-    tri(0.78); ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(255,214,200,.55)'; ctx.stroke()
-    const n = numbers[f]!
-    ctx.font = `800 ${n >= 10 ? 74 : 86}px Georgia, "Times New Roman", serif`
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-    ctx.lineJoin = 'round'; ctx.lineWidth = 10; ctx.strokeStyle = '#4a0606'; ctx.strokeText(String(n), 128, 160)
-    ctx.fillStyle = n === 20 ? '#F7F2E6' : '#F7F2E6'; ctx.fillText(String(n), 128, 160)
-    ctx.restore()
-  }
-  return c
-}
+// Модель: public/test-assets/models/dice-d20.glb (орех, выпуклые цифры). Первые 20 треугольников первого меша - грани,
+// грань i несёт число i+1, верх цифры смотрит на третью вершину грани. Цифры перекрашиваем в латунь, чтобы читались.
+const MODEL = '/test-assets/models/dice-d20.glb'
 
 async function init() {
+  let GLTFLoader: any
   try {
     T = await import('three')
+    GLTFLoader = (await import('three/examples/jsm/loaders/GLTFLoader.js')).GLTFLoader
     renderer = new T.WebGLRenderer({ canvas: canvas.value!, antialias: true, alpha: true, powerPreference: 'low-power' })
   } catch {
     failed.value = true
@@ -67,70 +43,46 @@ async function init() {
   camera = new T.PerspectiveCamera(32, 1, 0.1, 50)
   camera.position.set(0, 0, 4.4 * 1.8) // кубик того же размера на увеличенном холсте
 
-  // мультяшный свет: три ступени яркости → грани выглядят как плоская векторная заливка
-  scene.add(new T.AmbientLight(0xffffff, 1.1))
-  const key = new T.DirectionalLight(0xffffff, 2.2); key.position.set(-2, 3, 4); scene.add(key)
+  // тёплый свет комнаты: лампа сверху слева + слабый контровой
+  scene.add(new T.HemisphereLight(0xfff0d6, 0x3a1c08, 1.8))
+  const key = new T.DirectionalLight(0xffe2b0, 3.2); key.position.set(-2, 3, 4); scene.add(key)
+  const rim = new T.DirectionalLight(0xf2b45a, 1.2); rim.position.set(3, -1, -2); scene.add(rim)
 
-  // геометрия: икосаэдр без индексов → 20 отдельных треугольников
-  const geo = new T.IcosahedronGeometry(1, 0)
+  let model: THREE_NS.Object3D
+  try {
+    model = (await new GLTFLoader().loadAsync(MODEL)).scene
+  } catch {
+    renderer.dispose(); renderer = null
+    failed.value = true
+    return
+  }
+  const meshes: THREE_NS.Mesh[] = []
+  model.traverse((o: any) => o.isMesh && meshes.push(o))
+  const body = meshes[0]!
+  const geo = body.geometry as THREE_NS.BufferGeometry
   const pos = geo.getAttribute('position')
-  const normals: THREE_NS.Vector3[] = []
-  const tops: THREE_NS.Vector3[] = []
+  geo.clearGroups(); geo.addGroup(0, 60, 0); geo.addGroup(60, pos.count - 60, 1)
+  body.material = [
+    new T.MeshStandardMaterial({ color: 0x8a4e1e, roughness: 0.7 }),
+    new T.MeshStandardMaterial({ color: 0xf2b45a, roughness: 0.35, metalness: 0.6, emissive: 0x7e4515, emissiveIntensity: 0.9 })
+  ]
+  if (meshes[1]) meshes[1].material = new T.MeshStandardMaterial({ color: 0x45250e, roughness: 0.8 })
+
+  // ориентация «грань N смотрит в камеру, цифра стоит ровно»
+  const Z = new T.Vector3(0, 0, 1)
   for (let f = 0; f < 20; f++) {
     const a = new T.Vector3().fromBufferAttribute(pos, f * 3)
     const b = new T.Vector3().fromBufferAttribute(pos, f * 3 + 1)
     const c = new T.Vector3().fromBufferAttribute(pos, f * 3 + 2)
     const cen = a.clone().add(b).add(c).divideScalar(3)
-    normals.push(cen.clone().normalize())
-    tops.push(a.clone().sub(cen).normalize())
+    const qa = new T.Quaternion().setFromUnitVectors(cen.clone().normalize(), Z)
+    const up = c.clone().sub(cen).normalize().applyQuaternion(qa)
+    const qz = new T.Quaternion().setFromAxisAngle(Z, Math.atan2(up.x, up.y))
+    faceQuat[f + 1] = qz.multiply(qa)
   }
-  // противоположные грани в сумме дают 21, как у настоящего d20
-  const numbers = new Array<number>(20).fill(0)
-  let next = 1
-  for (let f = 0; f < 20; f++) {
-    if (numbers[f]) continue
-    const opp = normals.findIndex((n, i) => i !== f && !numbers[i] && n.dot(normals[f]!) < -0.99)
-    numbers[f] = next
-    if (opp >= 0) numbers[opp] = 21 - next
-    next++
-  }
-  // UV: вершина a → верх треугольника, b → низ-лево, c → низ-право
-  const uv = new Float32Array(60 * 2)
-  const W = CELL * 5, H = CELL * 4
-  for (let f = 0; f < 20; f++) {
-    const ox = (f % 5) * CELL, oy = Math.floor(f / 5) * CELL
-    const pts = [TRI.top, TRI.bl, TRI.br]
-    pts.forEach((p, i) => { uv[(f * 3 + i) * 2] = (ox + p[0]) / W; uv[(f * 3 + i) * 2 + 1] = 1 - (oy + p[1]) / H })
-  }
-  geo.setAttribute('uv', new T.BufferAttribute(uv, 2))
-
-  const atlas = new T.CanvasTexture(makeAtlas(numbers))
-  atlas.colorSpace = T.SRGBColorSpace
-  atlas.anisotropy = renderer.capabilities.getMaxAnisotropy()
-  const steps = new T.DataTexture(new Uint8Array([90, 90, 90, 255, 170, 170, 170, 255, 255, 255, 255, 255]), 3, 1)
-  steps.minFilter = steps.magFilter = T.NearestFilter
-  steps.needsUpdate = true
-  const body = new T.MeshToonMaterial({ map: atlas, gradientMap: steps })
 
   die = new T.Group()
-  die.add(new T.Mesh(geo, body))
-  // толстый тёмный контур (обратные грани чуть больше кубика) + светлые линии рёбер - как в векторной иллюстрации
-  const hull = new T.Mesh(geo, new T.MeshBasicMaterial({ color: 0x2a0505, side: T.BackSide }))
-  hull.scale.setScalar(1.07)
-  die.add(hull)
-  const edges = new T.LineSegments(new T.EdgesGeometry(geo), new T.LineBasicMaterial({ color: 0xffc9b8, transparent: true, opacity: 0.6 }))
-  edges.scale.setScalar(1.003)
-  die.add(edges)
-
-  // ориентация «грань N смотрит в камеру, цифра стоит ровно»
-  const Z = new T.Vector3(0, 0, 1)
-  for (let f = 0; f < 20; f++) {
-    const qa = new T.Quaternion().setFromUnitVectors(normals[f]!, Z)
-    const up = tops[f]!.clone().applyQuaternion(qa)
-    const qz = new T.Quaternion().setFromAxisAngle(Z, Math.atan2(up.x, up.y))
-    faceQuat[numbers[f]!] = qz.multiply(qa)
-  }
-
+  die.add(model)
   holder = new T.Group()
   holder.rotation.x = -0.28 // смотрим чуть сверху
   holder.add(die)
@@ -228,7 +180,7 @@ onBeforeUnmount(() => {
   <div ref="wrap" class="dice3d" :class="flash" :style="{ width: size }">
     <button type="button" class="dice3d-btn" :aria-label="label" :disabled="rolling" @click="emit('click')">
       <canvas v-show="!failed" ref="canvas" class="dice3d-canvas" />
-      <span v-if="failed" class="dice3d-flat">{{ value }}</span>
+      <img v-if="failed" src="/art/dice-d20.webp" alt="" class="dice3d-flat" />
     </button>
     <span class="dice3d-shadow" aria-hidden="true" />
     <span class="sr-only" aria-live="polite">{{ rolling ? 'Бросок…' : `Выпало ${value}` }}</span>
@@ -238,14 +190,13 @@ onBeforeUnmount(() => {
 <style>
 .dice3d { position: relative; aspect-ratio: 1; max-width: 100%; }
 .dice3d-btn { all: unset; position: relative; display: block; width: 100%; height: 100%; cursor: pointer; border-radius: 50%; }
-.dice3d-btn:focus-visible { outline: 2px solid #DF0000; outline-offset: 4px; }
+.dice3d-btn:focus-visible { outline: 2px solid #e0a24a; outline-offset: 4px; }
 .dice3d-btn:disabled { cursor: progress; }
 .dice3d-canvas { position: absolute; left: -40%; top: -40%; width: 180% !important; height: 180% !important; display: block; pointer-events: none; }
 .dice3d-shadow { position: absolute; left: 22%; right: 22%; bottom: 4%; height: 10%; border-radius: 50%; background: radial-gradient(#000c, #0000 70%); z-index: -1; }
 .dice3d.crit::before, .dice3d.fumble::before { content: ''; position: absolute; inset: -10%; border-radius: 50%; z-index: -1; animation: dice-flash 1.6s ease-out; }
-.dice3d.crit::before { background: radial-gradient(#f6d58aaa, #0000 65%); }
-.dice3d.fumble::before { background: radial-gradient(#8a1c1caa, #0000 65%); }
+.dice3d.crit::before { background: radial-gradient(#f2b45aaa, #0000 65%); }
+.dice3d.fumble::before { background: radial-gradient(#7a1a12aa, #0000 65%); }
 @keyframes dice-flash { from { opacity: 1; transform: scale(.6); } to { opacity: 0; transform: scale(1.3); } }
-.dice3d-flat { display: grid; place-items: center; width: 100%; height: 100%; font: 700 48px Georgia, serif; color: #f6d58a;
-  clip-path: polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%); background: #c80d0d; color: #F7F2E6; }
+.dice3d-flat { width: 100%; height: 100%; object-fit: contain; }
 </style>

@@ -10,10 +10,10 @@ useSiteSeo({
 const { data: games } = await useGames()
 
 const features = [
-  { icon: '🎲', title: 'Новая история каждую неделю', text: 'Каждую неделю открываем запись на новый сюжет в новом сеттинге - от сказки до хоррора.' },
-  { icon: '🕯️', title: 'Атмосфера за столом', text: 'Карты, миниатюры, свечи и музыка. Приходите и просто играйте - всё уже готово.' },
-  { icon: '🧭', title: 'Новичкам - можно', text: 'Объясним правила за 10 минут, поможем собрать персонажа. Опыт не нужен.' },
-  { icon: '👥', title: 'До 5 игроков', text: 'Маленькие столы - каждому игроку хватает внимания мастера и времени на отыгрыш.' }
+  { icon: '/art/decor-book.webp', title: 'Новая история каждую неделю', text: 'Каждую неделю открываем запись на новый сюжет в новом сеттинге - от сказки до хоррора.' },
+  { icon: '/art/decor-candle.webp', title: 'Атмосфера за столом', text: 'Карты, миниатюры, свечи и музыка. Приходите и просто играйте - всё уже готово.' },
+  { icon: '/art/decor-dice.webp', title: 'Новичкам - можно', text: 'Объясним правила за 10 минут, поможем собрать персонажа. Опыт не нужен.' },
+  { icon: '/art/ui-players.webp', title: 'До 5 игроков', text: 'Маленькие столы - каждому игроку хватает внимания мастера и времени на отыгрыш.' }
 ]
 
 const faq = [
@@ -79,7 +79,7 @@ useHead({
         </p>
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div v-for="f in features" :key="f.title" class="card">
-            <p class="text-3xl">{{ f.icon }}</p>
+            <img :src="f.icon" alt="" width="64" height="64" class="h-16 w-16 object-contain drop-shadow-[0_6px_8px_#000c]" loading="lazy" decoding="async" />
             <h3 class="mt-3 text-2xl">{{ f.title }}</h3>
             <p class="mt-2 text-sm text-ash">{{ f.text }}</p>
           </div>

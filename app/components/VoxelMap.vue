@@ -260,7 +260,7 @@ onBeforeUnmount(() => {
 .voxel-map { position: relative; width: 100%; aspect-ratio: 16 / 10.5; }
 /* Без рамки: карта отделена от фона мягким свечением воды */
 .voxel-map::before { content: ''; position: absolute; inset: 4% 2%; border-radius: 50%; z-index: -1; pointer-events: none;
-  background: radial-gradient(closest-side, #3b8ca566, #DF000014 60%, #0000); filter: blur(20px); }
+  background: radial-gradient(closest-side, #3b8ca566, #e0a24a14 60%, #0000); filter: blur(20px); }
 .voxel-canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; display: block; touch-action: manipulation;
   opacity: 0; transition: opacity .6s; }
 .is-ready .voxel-canvas { opacity: 1; }

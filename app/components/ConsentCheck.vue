@@ -62,17 +62,17 @@ const site = useRuntimeConfig().public.siteName
 </template>
 
 <style>
-.consent-box { flex: none; width: 18px; height: 18px; margin-top: 1px; border-radius: 4px; border: 1px solid #4a1010; background: #0a0202; display: grid; place-content: center; cursor: pointer; transition: box-shadow .3s, border-color .3s; }
-.consent-box.on { background: var(--gold); border-color: #ff8a7a; }
-.consent-box.on::after { content: ''; width: 9px; height: 5px; border: 2px solid #040404; border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px, -1px); }
-.consent-box:focus-visible { outline: 2px solid #DF0000; outline-offset: 2px; }
+.consent-box { flex: none; width: 18px; height: 18px; margin-top: 1px; border-radius: 4px; border: 1px solid #5a3416; background: #100904; display: grid; place-content: center; cursor: pointer; transition: box-shadow .3s, border-color .3s; }
+.consent-box.on { background: var(--gold); border-color: #f6c873; }
+.consent-box.on::after { content: ''; width: 9px; height: 5px; border: 2px solid #100904; border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px, -1px); }
+.consent-box:focus-visible { outline: 2px solid #e0a24a; outline-offset: 2px; }
 /* Ссылка на текст согласия - золотая плашка-подсветка, чтобы было видно, что это ссылка */
-.consent-link { color: #F7F2E6; font-weight: 600; padding: 0 4px; margin: 0 -2px; border-radius: 4px; background: #DF00001f; box-shadow: inset 0 -1px 0 #DF000099; transition: background .2s, color .2s; }
-.consent-link:hover { background: #DF000038; color: #F7F2E6; }
+.consent-link { color: #f3e6c8; font-weight: 600; padding: 0 4px; margin: 0 -2px; border-radius: 4px; background: #e0a24a1f; box-shadow: inset 0 -1px 0 #e0a24a99; transition: background .2s, color .2s; }
+.consent-link:hover { background: #e0a24a38; color: #f3e6c8; }
 /* Мягкая подсказка: два спокойных «вдоха» свечения на галочке и ссылке */
-.consent-row.nudge .consent-box { border-color: #ff8a7a; animation: c-glow 1.4s ease-in-out 2; }
+.consent-row.nudge .consent-box { border-color: #f6c873; animation: c-glow 1.4s ease-in-out 2; }
 .consent-row.nudge .consent-link { animation: c-glow 1.4s ease-in-out 2; }
-@keyframes c-glow { 50% { box-shadow: 0 0 0 3px #DF000033, 0 0 14px #DF000066; } }
-.consent-hint { margin-top: 8px; padding: 7px 10px 7px 12px; border-left: 2px solid #DF0000; border-radius: 0 8px 8px 0; background: #DF000012; font-size: 12px; line-height: 1.4; color: #EEE5CE; }
+@keyframes c-glow { 50% { box-shadow: 0 0 0 3px #e0a24a33, 0 0 14px #e0a24a66; } }
+.consent-hint { margin-top: 8px; padding: 7px 10px 7px 12px; border-left: 2px solid #e0a24a; border-radius: 0 8px 8px 0; background: #e0a24a12; font-size: 12px; line-height: 1.4; color: #e9dcc0; }
 @media (prefers-reduced-motion: reduce) { .consent-row.nudge * { animation: none !important; } }
 </style>

@@ -13,11 +13,11 @@ defineProps<{ msg?: string | null }>()
 
 <style>
 .field-error { position: relative; z-index: 5; margin-top: 8px; display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px 7px 8px; border-radius: 10px;
-  font-size: 13px; color: #F7F2E6; border: 1px solid #DF000099;
-  background: #180505;
-  box-shadow: 0 8px 20px #000a, 0 0 12px #DF000033; }
+  font-size: 13px; color: #f3e6c8; border: 1px solid #e0a24a99;
+  background: #23150a;
+  box-shadow: 0 8px 20px #000a, 0 0 12px #e0a24a33; }
 .field-error::before { content: ''; position: absolute; top: -6px; left: 18px; width: 10px; height: 10px; transform: rotate(45deg);
-  background: #2a1810; border-left: 1px solid #DF000099; border-top: 1px solid #DF000099; }
-.field-error-ico { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; font-weight: 800; font-size: 13px; color: #040404;
-  background: #DF0000; box-shadow: inset 0 1px 0 #fff6; }
+  background: #2a1810; border-left: 1px solid #e0a24a99; border-top: 1px solid #e0a24a99; }
+.field-error-ico { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; font-weight: 800; font-size: 13px; color: #100904;
+  background: #e0a24a; box-shadow: inset 0 1px 0 #fff6; }
 </style>

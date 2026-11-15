@@ -146,13 +146,13 @@ async function submit() {
           @click="pickDay(d)"
         >
           {{ d.getDate() }}
-          <span v-if="byDay.has(dayKey(d))" class="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full" :class="dayFull(dayKey(d)) ? 'bg-[#959595]' : 'bg-candle'" />
+          <span v-if="byDay.has(dayKey(d))" class="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full" :class="dayFull(dayKey(d)) ? 'bg-[#b3a285]' : 'bg-candle'" />
         </button>
       </div>
 
       <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ash">
         <span class="inline-flex items-center gap-1.5"><i class="h-2 w-2 rounded-full bg-candle" />есть места</span>
-        <span class="inline-flex items-center gap-1.5"><i class="h-2 w-2 rounded-full bg-[#959595]" />всё занято</span>
+        <span class="inline-flex items-center gap-1.5"><i class="h-2 w-2 rounded-full bg-[#b3a285]" />всё занято</span>
         <span v-if="isDemo" class="ml-auto rounded border border-wood-2 px-1.5 py-0.5 text-[10px] uppercase tracking-wider">демо-расписание</span>
       </div>
       <div v-if="!selectedDay" class="mt-4 text-sm text-ash">Выберите подсвеченный день.</div>
@@ -163,7 +163,7 @@ async function submit() {
           :key="s.id"
           type="button"
           class="w-full rounded-xl border p-4 text-left transition"
-          :class="s.seats_left === 0 ? 'cursor-not-allowed border-[#95959555] opacity-70' : selected?.id === s.id ? 'border-candle bg-candle/10' : 'border-wood-2 hover:border-candle/60'"
+          :class="s.seats_left === 0 ? 'cursor-not-allowed border-[#b3a28555] opacity-70' : selected?.id === s.id ? 'border-candle bg-candle/10' : 'border-wood-2 hover:border-candle/60'"
           :disabled="s.seats_left === 0"
           @click="selected = s"
         >
@@ -171,7 +171,7 @@ async function submit() {
             <span class="font-semibold">{{ fmtTime(s.starts_at) }} · {{ s.game_title || 'Партия' }}</span>
             <span v-if="s.is_weekly" class="badge">История недели</span>
           </div>
-          <p class="mt-1 text-sm text-ash">{{ Number(s.duration_h) }} ч · {{ s.price }} ₽ · <template v-if="s.seats_left">свободно мест: <b class="text-candle">{{ s.seats_left }}</b> из {{ s.max_players }}</template><b v-else class="text-[#959595]">мест нет, стол собран</b></p>
+          <p class="mt-1 text-sm text-ash">{{ Number(s.duration_h) }} ч · {{ s.price }} ₽ · <template v-if="s.seats_left">свободно мест: <b class="text-candle">{{ s.seats_left }}</b> из {{ s.max_players }}</template><b v-else class="text-[#b3a285]">мест нет, стол собран</b></p>
         </button>
       </div>
     </div>
@@ -215,11 +215,11 @@ async function submit() {
 
           <div class="price-plaque">
             <svg class="pp-coins" viewBox="0 0 64 64" aria-hidden="true">
-              <defs><linearGradient id="ppg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7F2E6" /><stop offset=".5" stop-color="#DF0000" /><stop offset="1" stop-color="#8a0000" /></linearGradient></defs>
-              <g stroke="#040404" stroke-width="1.5"><ellipse cx="24" cy="50" rx="17" ry="6" fill="url(#ppg)" /><path d="M7 44v6c0 3.3 7.6 6 17 6s17-2.7 17-6v-6" fill="#a30000" /><ellipse cx="24" cy="44" rx="17" ry="6" fill="url(#ppg)" />
-                <path d="M7 37v7c0 3.3 7.6 6 17 6s17-2.7 17-6v-7" fill="#a30000" /><ellipse cx="24" cy="37" rx="17" ry="6" fill="url(#ppg)" />
+              <defs><linearGradient id="ppg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3e6c8" /><stop offset=".5" stop-color="#e0a24a" /><stop offset="1" stop-color="#7e4515" /></linearGradient></defs>
+              <g stroke="#100904" stroke-width="1.5"><ellipse cx="24" cy="50" rx="17" ry="6" fill="url(#ppg)" /><path d="M7 44v6c0 3.3 7.6 6 17 6s17-2.7 17-6v-6" fill="#7e4515" /><ellipse cx="24" cy="44" rx="17" ry="6" fill="url(#ppg)" />
+                <path d="M7 37v7c0 3.3 7.6 6 17 6s17-2.7 17-6v-7" fill="#7e4515" /><ellipse cx="24" cy="37" rx="17" ry="6" fill="url(#ppg)" />
                 <circle cx="44" cy="24" r="14" fill="url(#ppg)" /><circle cx="44" cy="24" r="10" fill="none" stroke-dasharray="2 2" /></g>
-              <text x="44" y="29" text-anchor="middle" font-size="13" font-weight="700" fill="#040404">₽</text>
+              <text x="44" y="29" text-anchor="middle" font-size="13" font-weight="700" fill="#100904">₽</text>
             </svg>
             <div class="min-w-0">
               <p class="pp-cap">Казна партии · примерно</p>
@@ -251,14 +251,14 @@ async function submit() {
 </template>
 
 <style>
-.day-full { color: #959595aa; background: repeating-linear-gradient(135deg, #95959522 0 4px, #0000 4px 8px); }
-.day-full:hover { background-color: #95959522; }
+.day-full { color: #b3a285aa; background: repeating-linear-gradient(135deg, #b3a28522 0 4px, #0000 4px 8px); }
+.day-full:hover { background-color: #b3a28522; }
 /* «Казна партии»: блок с итоговой ценой */
 .price-plaque { position: relative; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 4px 16px; padding: 16px 18px 12px; border-radius: 14px;
-  background: radial-gradient(90% 140% at 0% 50%, #DF000026, #0000 60%), linear-gradient(180deg, #180505, #0c0202);
-  border: 1px solid #DF000066; box-shadow: inset 0 0 0 4px #040404, inset 0 0 0 5px #DF000033, 0 6px 18px #0008; }
-.pp-coins { width: 64px; height: 64px; filter: drop-shadow(0 4px 8px #000a) drop-shadow(0 0 10px #DF000044); }
-.pp-cap { font-size: 10px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: #EEE5CE; }
-.pp-sum { font-family: var(--font-display); font-size: 38px; font-weight: 700; line-height: 1; background: var(--gold-text); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 2px 6px #DF000040); }
-.pp-note { grid-column: 1 / -1; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #DF000033; font-size: 11px; color: #959595; text-align: right; font-style: italic; }
+  background: radial-gradient(90% 140% at 0% 50%, #e0a24a26, #0000 60%), linear-gradient(180deg, #23150a, #1a0f06);
+  border: 1px solid #e0a24a66; box-shadow: inset 0 0 0 4px #100904, inset 0 0 0 5px #e0a24a33, 0 6px 18px #0008; }
+.pp-coins { width: 64px; height: 64px; filter: drop-shadow(0 4px 8px #000a) drop-shadow(0 0 10px #e0a24a44); }
+.pp-cap { font-size: 10px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: #e9dcc0; }
+.pp-sum { font-family: var(--font-display); font-size: 38px; font-weight: 700; line-height: 1; background: var(--gold-text); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 2px 6px #e0a24a40); }
+.pp-note { grid-column: 1 / -1; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #e0a24a33; font-size: 11px; color: #b3a285; text-align: right; font-style: italic; }
 </style>

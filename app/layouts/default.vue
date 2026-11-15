@@ -44,7 +44,7 @@ useHead({
 
 <template>
   <div class="flex min-h-dvh flex-col">
-    <header class="fixed inset-x-0 top-0 z-40 shadow-[0_6px_20px_#000a]" style="background: linear-gradient(180deg,#140303f2,#0a0202f5); backdrop-filter: none">
+    <header class="fixed inset-x-0 top-0 z-40 shadow-[0_6px_20px_#000a]" style="background: linear-gradient(180deg,#1d1107f2,#100904f5); backdrop-filter: none">
       <div class="mx-auto flex h-16 w-full max-w-[1360px] items-center justify-between gap-3 px-4 md:px-6">
         <NuxtLink to="/" class="flex items-center gap-2.5" aria-label="На главную">
           <LogoSkull />
@@ -54,7 +54,7 @@ useHead({
           <NuxtLink v-for="n in nav" :key="n.to" :to="n.to" class="nav-pill whitespace-nowrap">{{ n.label }}</NuxtLink>
         </nav>
         <div class="hidden items-center gap-2 lg:flex">
-          <button type="button" class="btn-ghost hidden whitespace-nowrap px-3 py-2 text-sm xl:inline-flex" title="Генератор героя" @click="goGenerator">🎲<span class="hidden min-[1360px]:inline">Генератор героя</span></button>
+          <button type="button" class="btn-ghost hidden whitespace-nowrap px-3 py-2 text-sm xl:inline-flex" title="Генератор героя" @click="goGenerator"><img src="/art/decor-dice.webp" alt="" class="h-6 w-6 object-contain" /><span class="hidden min-[1360px]:inline">Генератор героя</span></button>
           <NuxtLink to="#booking" class="btn-primary whitespace-nowrap py-2">Записаться</NuxtLink>
         </div>
         <button class="nav-pill lg:hidden" :aria-expanded="open" aria-label="Меню" @click="open = !open">☰</button>
@@ -72,7 +72,7 @@ useHead({
     </main>
 
     <div class="metal-band" />
-    <footer class="relative overflow-hidden py-8 text-sm text-ash" style="background: linear-gradient(180deg,#0e0202,#060101); box-shadow: inset 0 1px 0 #DF000044">
+    <footer class="relative overflow-hidden py-8 text-sm text-ash" style="background: linear-gradient(180deg,#0e0202,#060101); box-shadow: inset 0 1px 0 #e0a24a44">
       <DecorIcon name="nails" class="decor bottom-2 right-4 hidden h-24 w-24 rotate-12 opacity-80 md:block" />
       <div class="container-x mb-6 grid gap-6 sm:grid-cols-3">
         <div>

@@ -49,21 +49,21 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 .pg .g-tall { grid-row: span 2; } .pg .g-banner { grid-column: 1 / -1; grid-row: span 2; } .pg .g-banner img { object-position: 50% 62%; }
 @media (min-width: 900px) { .pg .g-banner { grid-row: span 1; height: 300px; } } @media (min-width: 900px) { .pg .g-wide { grid-column: span 2; } }
 .pg-compact { grid-auto-rows: 190px; } @media (min-width: 900px) { .pg-compact { grid-auto-rows: 210px; } }
-.pg-item { position: relative; overflow: hidden; border-radius: 16px; border: 1px solid #DF000055; background: #140303; cursor: zoom-in;
-  box-shadow: 0 0 20px #DF00001a; transition: border-color var(--t) var(--ease), box-shadow var(--t) var(--ease); }
+.pg-item { position: relative; overflow: hidden; border-radius: 16px; border: 1px solid #e0a24a55; background: #1d1107; cursor: zoom-in;
+  box-shadow: 0 0 20px #e0a24a1a; transition: border-color var(--t) var(--ease), box-shadow var(--t) var(--ease); }
 .pg-item img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.85) brightness(.82) sepia(.15) hue-rotate(-12deg); transform: scale(1.02);
   transition: transform .9s var(--ease), filter var(--t-slow) var(--ease); }
-.pg-item::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, #0000 50%, #0a0202e6); pointer-events: none; }
-.pg-item:hover, .pg-item:focus-visible { border-color: #DF0000; box-shadow: 0 0 28px #DF000066; outline: none; }
+.pg-item::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, #0000 50%, #100904e6); pointer-events: none; }
+.pg-item:hover, .pg-item:focus-visible { border-color: #e0a24a; box-shadow: 0 0 28px #e0a24a66; outline: none; }
 .pg-item:hover img, .pg-item:focus-visible img { transform: scale(1.08); filter: saturate(1) brightness(1) sepia(0); }
-.pg-cap { position: absolute; z-index: 1; left: 14px; right: 14px; bottom: 12px; text-align: left; font: 700 18px/1.1 var(--font-display); color: #F7F2E6; text-shadow: 0 0 12px #DF000088, 0 2px 6px #000; }
-.pg-box { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 4vh 6vw; background: #0a0202f2; }
-.pg-big { max-width: 100%; max-height: 82vh; border-radius: 16px; border: 1px solid #DF000088; box-shadow: 0 0 50px #DF000044; animation: pg-in .45s var(--ease); }
+.pg-cap { position: absolute; z-index: 1; left: 14px; right: 14px; bottom: 12px; text-align: left; font: 700 18px/1.1 var(--font-display); color: #f3e6c8; text-shadow: 0 0 12px #e0a24a88, 0 2px 6px #000; }
+.pg-box { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 4vh 6vw; background: #100904f2; }
+.pg-big { max-width: 100%; max-height: 82vh; border-radius: 16px; border: 1px solid #e0a24a88; box-shadow: 0 0 50px #e0a24a44; animation: pg-in .45s var(--ease); }
 @keyframes pg-in { from { opacity: 0; transform: scale(.96); } }
-.pg-big-cap { margin-top: 12px; font: 700 22px var(--font-display); color: #F7F2E6; text-shadow: 0 0 12px #DF000088; }
-.pg-nav, .pg-x { position: absolute; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; font-size: 30px; line-height: 1; color: #F7F2E6;
-  border: 1px solid #DF000088; background: #140303cc; transition: box-shadow var(--t) var(--ease), background var(--t) var(--ease); }
-.pg-nav:hover, .pg-x:hover { background: #DF0000; box-shadow: 0 0 18px #DF0000; }
+.pg-big-cap { margin-top: 12px; font: 700 22px var(--font-display); color: #f3e6c8; text-shadow: 0 0 12px #e0a24a88; }
+.pg-nav, .pg-x { position: absolute; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; font-size: 30px; line-height: 1; color: #f3e6c8;
+  border: 1px solid #e0a24a88; background: #1d1107cc; transition: box-shadow var(--t) var(--ease), background var(--t) var(--ease); }
+.pg-nav:hover, .pg-x:hover { background: #e0a24a; box-shadow: 0 0 18px #e0a24a; }
 .pg-nav.l { left: 2vw; top: 50%; } .pg-nav.r { right: 2vw; top: 50%; } .pg-x { right: 2vw; top: 2vw; }
 @media (prefers-reduced-motion: reduce) { .pg-item img, .pg-big { transition: none; animation: none; } }
 </style>

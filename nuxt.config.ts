@@ -13,7 +13,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   vite: {
     plugins: [tailwindcss()],
-    optimizeDeps: { include: ['three', 'three/examples/jsm/environments/RoomEnvironment.js'] }
+    optimizeDeps: { include: ['three', 'three/examples/jsm/loaders/GLTFLoader.js'] }
   },
 
   runtimeConfig: {
@@ -62,13 +62,15 @@ export default defineNuxtConfig({
       charset: 'utf-8',
       viewport: 'width=device-width, initial-scale=1',
       link: [
-        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg?v=4' },
+        { rel: 'icon', type: 'image/png', sizes: '64x64', href: '/favicon-64.png?v=5' },
+        { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32.png?v=5' },
+        { rel: 'apple-touch-icon', href: '/apple-touch-icon.png?v=5' },
         // Шрифты лежат локально (public/fonts, @font-face в main.css). Предзагружаем 2 главных кириллических файла
         { rel: 'preload', as: 'font', type: 'font/woff2', href: '/fonts/inter-cyrillic-wght-normal.woff2', crossorigin: '' },
         { rel: 'preload', as: 'font', type: 'font/woff2', href: '/fonts/cormorant-sc-cyrillic-700-normal.woff2', crossorigin: '' }
       ],
       meta: [
-        { name: 'theme-color', content: '#120d0a' },
+        { name: 'theme-color', content: '#100904' },
         { name: 'yandex-verification', content: '4b93841bf1a2d148' }
       ]
     }
@@ -84,10 +86,9 @@ export default defineNuxtConfig({
     '/dragons/**': { ssr: false, headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
     '/api/admin/**': { headers: { 'X-Robots-Tag': 'noindex' } },
     '/images/**': { headers: { 'Cache-Control': assetCache } },
-    '/textures/**': { headers: { 'Cache-Control': assetCache } },
-    '/decor/**': { headers: { 'Cache-Control': assetCache } },
-    '/cards/**': { headers: { 'Cache-Control': assetCache } },
-    '/ui/**': { headers: { 'Cache-Control': assetCache } },
+    '/art/**': { headers: { 'Cache-Control': assetCache } },
+    '/photos/**': { headers: { 'Cache-Control': assetCache } },
+    '/test-assets/**': { headers: { 'Cache-Control': assetCache } },
     // список сюжетов меняется редко - кэш на сервере 60 с (меньше запросов к БД)
     '/api/games': { swr: 60 },
     '/sitemap.xml': { swr: 3600 },
