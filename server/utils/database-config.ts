@@ -6,6 +6,14 @@ export function normalizeDatabaseUrl(input: unknown): string {
   if (value.startsWith('NUXT_DATABASE_URL=')) value = value.slice('NUXT_DATABASE_URL='.length).trim()
   if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1)
   try {
+    if (/[\r\n]/.test(value)) throw new Error('multiple lines')
+    // A panel may supply an unescaped password. Parse only the authority;
+    // fragments after the database path remain invalid. Never decode '+' as a space.
+    const credentials = value.match(/^(postgres(?:ql)?:\/\/)([^:/@\s]+):([^/]*)@([^/?#@]+)(\/[^#]*)$/)
+    if (credentials) {
+      const [, scheme, user, password, host, path] = credentials
+      value = `${scheme}${encodeURIComponent(decodeURIComponent(user))}:${encodeURIComponent(decodeURIComponent(password))}@${host}${path}`
+    }
     const url = new URL(value)
     if (!['postgres:', 'postgresql:'].includes(url.protocol) || !url.hostname || url.pathname.length < 2 || url.hash) throw new Error('invalid database URL')
     return value

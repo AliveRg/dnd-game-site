@@ -13,3 +13,15 @@ test('invalid URL is rejected without retaining raw input or password',()=>{
   })
  }
 })
+
+test('raw reserved characters in panel passwords are encoded without changing credentials',()=>{
+ const raw='postgresql://user:A<6#|_raw+@db.example:5432/database'
+ const normalized=normalizeDatabaseUrl(raw)
+ const parsed=new URL(normalized)
+ assert.equal(decodeURIComponent(parsed.password),'A<6#|_raw+')
+ assert.equal(parsed.hostname,'db.example')
+ assert.equal(parsed.hash,'')
+ assert.ok(normalized.includes('%23'))
+ assert.equal(normalizeDatabaseUrl(normalized),normalized)
+ assert.throws(()=>normalizeDatabaseUrl('postgresql://user:password@host/db#fragment'),{statusCode:503})
+})
