@@ -110,13 +110,13 @@ async function submit() {
   state.value = 'sending'
   error.value = ''
   try {
-    res.value = await $fetch('/api/booking', { method: 'POST', body: { ...form, sessionId: selected.value && !selected.value.demo ? selected.value.id : null,
+    res.value = await $fetch('/api/calendar-booking', { method: 'POST', body: { ...form, sessionId: selected.value && !selected.value.demo ? selected.value.id : null,
       comment: selected.value?.demo ? `[Желаемая дата: ${fmtDate(selected.value.starts_at)}, ${fmtTime(selected.value.starts_at)}, ${selected.value.game_title}] ${form.comment}` : form.comment, utm: getUtm() } }) as any
     sentTitle.value = selected.value?.game_title ?? 'Партия - подберём дату'
     sentWhen.value = selected.value ? `${fmtDate(selected.value.starts_at)}, ${fmtTime(selected.value.starts_at)}` : ''
     sentPlayers.value = form.players
     state.value = 'ok'
-    $ymGoal('booking_sent', { players: form.players, tariff: form.tariff })
+    $ymGoal('booking_sent')
     refresh()
   } catch (e: any) {
     state.value = 'error'
@@ -182,7 +182,7 @@ async function submit() {
         <p class="font-display text-2xl">
           {{ selected ? `${selected.game_title ?? 'Партия'} - ${fmtDate(selected.starts_at)}, ${fmtTime(selected.starts_at)}` : 'Заявка без даты - подберём сами' }}
         </p>
-        <form class="mt-5 space-y-4" novalidate @submit.prevent="submit">
+        <form class="mt-5 space-y-4 ym-hide-content" novalidate @submit.prevent="submit">
           <input v-model="form.website" class="hidden" tabindex="-1" autocomplete="off" />
           <div class="grid gap-4 sm:grid-cols-2">
             <div><label class="label">Имя</label><input v-model="form.name" data-field="bk-name" class="input" autocomplete="given-name" @input="clear('name')" /><FieldError :msg="errors.name" /></div>

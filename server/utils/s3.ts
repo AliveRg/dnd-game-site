@@ -4,7 +4,7 @@ let client: S3Client | null = null
 
 export function useS3() {
   const c = useRuntimeConfig()
-  if (!c.s3Bucket || !c.s3AccessKey) {
+  if (!c.s3Bucket || !c.s3AccessKey || !c.s3SecretKey) {
     throw createError({ statusCode: 503, message: 'S3 не настроен' })
   }
   if (!client) {

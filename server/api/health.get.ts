@@ -1,13 +1,6 @@
-export default defineEventHandler(async () => {
-  let db: 'off' | 'ok' | 'error' = 'off'
-  if (isDbConfigured()) {
-    try {
-      await useDb().query('SELECT 1')
-      db = 'ok'
-    } catch {
-      db = 'error'
-    }
-  }
-  // Всегда 200, чтобы App Platform не перезапускал контейнер из-за временных проблем с БД
-  return { ok: true, db, time: new Date().toISOString() }
+// Container liveness: database configuration/outages must not restart the web process.
+// Dependency readiness is reported separately at /api/ready.
+export default defineEventHandler((event) => {
+  setResponseHeader(event, 'Cache-Control', 'no-store')
+  return { ok: true }
 })

@@ -1,6 +1,6 @@
 # ---------- Сборка ----------
-# lts = последняя LTS-версия Node.js на момент сборки
-FROM node:lts-alpine AS build
+# Фиксированная версия Node.js для воспроизводимой сборки
+FROM node:24.15.0-alpine AS build
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -10,7 +10,7 @@ COPY . .
 RUN npm run build
 
 # ---------- Продакшен ----------
-FROM node:lts-alpine AS runtime
+FROM node:24.15.0-alpine AS runtime
 WORKDIR /app
 
 ENV NODE_ENV=production \
@@ -26,6 +26,7 @@ USER node
 # App Platform (Timeweb) берёт порт из EXPOSE и сам вешает nginx + SSL на 80/443
 EXPOSE 3000
 
+# Проверяем HTTP-процесс; БД отдельно проверяется через /api/ready.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD wget -qO- http://127.0.0.1:3000/api/health || exit 1
 

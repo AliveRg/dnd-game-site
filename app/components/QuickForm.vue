@@ -1,5 +1,8 @@
 <script setup lang="ts">
 // Короткая форма на первом экране: имя + контакт → заявка «подобрать партию»
+import { normalizePhone } from '#shared/utils/booking'
+
+const requestId = ref('')
 const { $ymGoal } = useNuxtApp()
 const form = reactive({ name: '', contact: '', consent: false, website: '' })
 const state = ref<'idle' | 'sending' | 'ok' | 'error'>('idle')
@@ -12,19 +15,26 @@ async function submit() {
   if (!form.consent) { consentRef.value?.nudge(); return }
   const ok = check({
     name: () => (form.name.trim().length < 2 ? 'Как к вам обращаться?' : null),
-    contact: () => (form.contact.trim().length < 3 ? 'Оставьте Telegram, VK или e-mail - напишем туда' : null),
+    contact: () => (form.contact.trim().length < 3 ? 'Оставьте Телефон, Telegram, VK или e-mail - напишем туда' : null),
     consent: () => (!form.consent ? 'Нужно согласие, иначе мы не сможем ответить' : null)
   }, `${uid}-`)
   if (!ok) return
   state.value = 'sending'
   error.value = ''
   try {
-    await $fetch('/api/booking', { method: 'POST', body: { ...form, players: 1, tariff: 'promo4', comment: 'Заявка с первого экрана', utm: getUtm() } })
+    const body = { ...form, players: 1, tariff: 'promo4', comment: 'Заявка с первого экрана', utm: getUtm() }
+    if (/^[+\d\s().-]+$/.test(form.contact.trim())) {
+      const contact = normalizePhone(form.contact.trim())
+      requestId.value ||= crypto.randomUUID()
+      await $fetch('/api/booking', { method: 'POST', body: { ...body, contact, source: 'quick', requestId: requestId.value } })
+    } else {
+      await $fetch('/api/calendar-booking', { method: 'POST', body })
+    }
     state.value = 'ok'
     $ymGoal('hero_form_sent')
   } catch (e: any) {
     state.value = 'error'
-    error.value = e?.data?.message || 'Не получилось отправить'
+    error.value = e?.data?.message || e?.message || 'Не получилось отправить'
   }
 }
 </script>
@@ -34,14 +44,14 @@ async function submit() {
     <template v-if="state !== 'ok'">
       <h2 class="mb-1 text-3xl">Записаться на партию</h2>
       <p class="mb-4 text-sm text-ash">Напишем и подберём ближайшую игру</p>
-      <form class="space-y-3" novalidate @submit.prevent="submit">
+      <form class="space-y-3 ym-hide-content" novalidate @submit.prevent="submit">
         <input v-model="form.website" class="hidden" tabindex="-1" autocomplete="off" />
         <div>
           <input v-model="form.name" :data-field="`${uid}-name`" class="input" placeholder="Имя" autocomplete="given-name" @input="clear('name')" />
           <FieldError :msg="errors.name" />
         </div>
         <div>
-          <input v-model="form.contact" :data-field="`${uid}-contact`" class="input" placeholder="Telegram, VK или e-mail" @input="clear('contact')" />
+          <input v-model="form.contact" :data-field="`${uid}-contact`" class="input" placeholder="Телефон, Telegram, VK или e-mail" @input="clear('contact')" />
           <FieldError :msg="errors.contact" />
         </div>
         <div>
