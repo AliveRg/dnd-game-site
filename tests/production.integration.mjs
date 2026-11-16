@@ -62,6 +62,11 @@ try{
  const publicContent=await call('/api/site-content');assert.equal(publicContent.data.club.title,content.title);assert.equal(publicContent.data.club.images.length,2)
  assert.equal((await call('/klub')).status,200)
  assert.equal((await call('/api/admin/site-content',{method:'PUT',origin:'https://evil.test',body:{section:'club',content}})).status,403)
+ const calendarBody={...bookingBody,contact:'calendar@example.test',requestId:randomUUID()}
+ const calendar=await call('/api/calendar-booking',{method:'POST',body:calendarBody});assert.equal(calendar.status,200);assert.ok(calendar.data.id)
+ assert.equal((await call('/api/calendar-booking',{method:'POST',body:calendarBody})).data.id,calendar.data.id)
+ assert.equal((await call('/api/calendar-booking',{method:'POST',body:{...calendarBody,requestId:randomUUID(),consent:'true'}})).status,400)
+ assert.equal((await call('/api/calendar-booking',{method:'POST',body:{...calendarBody,requestId:randomUUID(),players:1.5}})).status,400)
  assert.equal((await call('/api/admin/logout',{method:'POST'})).status,200)
  const replay=await fetch(base+'/api/admin/posts',{headers:{Cookie:originalCookie}});assert.equal(replay.status,401)
  console.log('PASS: production HTTP auth, persistence/idempotency, pagination/read/status/note, metadata rejection, draft/publication, canonical type guard, S3 mock upload/media, page-gallery editing, CSRF and revoked-cookie replay')

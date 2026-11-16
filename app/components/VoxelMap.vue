@@ -147,7 +147,7 @@ async function init() {
   const water = new T.InstancedMesh(new T.BoxGeometry(1, 0.6, 1), new T.MeshLambertMaterial({ color: 0xffffff }), sh.length)
   water.receiveShadow = true
   const mtx = new T.Matrix4()
-  const near = new T.Color(0x86d3dc), far = new T.Color(0x3b8ca5)
+  const near = new T.Color(0x4a8a96), far = new T.Color(0x183a48)
   const tiles = world.zones.flatMap((z) => z.tiles)
   sh.forEach(([x, z], k) => {
     const d = Math.min(...tiles.map((t) => Math.hypot(t[0] - x, t[1] - z)))
@@ -160,7 +160,7 @@ async function init() {
   const g = document.createElement('canvas'); g.width = g.height = 256
   const gx = g.getContext('2d')!
   const grad = gx.createRadialGradient(128, 128, 40, 128, 128, 128)
-  grad.addColorStop(0, 'rgba(47,111,128,1)'); grad.addColorStop(0.72, 'rgba(36,84,104,.9)'); grad.addColorStop(1, 'rgba(19,11,9,0)')
+  grad.addColorStop(0, 'rgba(30,62,70,1)'); grad.addColorStop(0.7, 'rgba(24,22,18,.85)'); grad.addColorStop(1, 'rgba(16,9,4,0)')
   gx.fillStyle = grad; gx.fillRect(0, 0, 256, 256)
   const tex = new T.CanvasTexture(g); tex.colorSpace = T.SRGBColorSpace
   const sea = new T.Mesh(new T.PlaneGeometry(1, 1), new T.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }))
@@ -260,10 +260,13 @@ onBeforeUnmount(() => {
 .voxel-map { position: relative; width: 100%; aspect-ratio: 16 / 10.5; }
 /* Без рамки: карта отделена от фона мягким свечением воды */
 .voxel-map::before { content: ''; position: absolute; inset: 4% 2%; border-radius: 50%; z-index: -1; pointer-events: none;
-  background: radial-gradient(closest-side, #3b8ca566, #DF000014 60%, #0000); filter: blur(20px); }
+  background: radial-gradient(closest-side, #3b8ca566, #e0a24a14 60%, #0000); filter: blur(20px); }
 .voxel-canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; display: block; touch-action: manipulation;
   opacity: 0; transition: opacity .6s; }
 .is-ready .voxel-canvas { opacity: 1; }
+/* края холста растворяются: море не обрезается прямой линией */
+.voxel-canvas { -webkit-mask: linear-gradient(90deg, #0000, #000 7%, #000 93%, #0000), linear-gradient(180deg, #0000, #000 8%, #000 92%, #0000); -webkit-mask-composite: source-in;
+  mask: linear-gradient(90deg, #0000, #000 7%, #000 93%, #0000), linear-gradient(180deg, #0000, #000 8%, #000 92%, #0000); mask-composite: intersect; }
 .voxel-skel { position: absolute; inset: 18% 14%; display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
 .voxel-skel span { aspect-ratio: 1.15; background: #ece6d814; clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
   animation: vx-pulse 1.4s ease-in-out infinite; animation-delay: calc(var(--i) * .08s); }

@@ -42,3 +42,7 @@ gh pr create --base main --head release/world-cards
 ## Среда разработки
 
 Используйте Node 24, параметры из `.env.example`, локальную PostgreSQL и тестовое хранилище для работы с файлами. Для локальной разработки задайте `NUXT_PUBLIC_YANDEX_METRIKA_ID=0` и `NUXT_PUBLIC_INDEXABLE=false`. Ключи, рабочие пароли и файлы окружения хранятся отдельно от Git. Для тестов заявок используйте вымышленные данные. Выберите свой промпт в [инструкции для Claude Code](prompts/claude-design.md) или в [плане владельца](prompts/release-assistant.md).
+
+## Ассеты дизайнера
+
+В `design/rogovik` переданы 49 PNG и 2 GLB в `public/test-assets`. Их состав и порядок использования описаны в [каталоге ассетов](DESIGN-ASSETS.md). Подключение изображений и моделей к компонентам выполняется отдельными коммитами дизайнера.

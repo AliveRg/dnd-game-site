@@ -31,7 +31,7 @@ export function validateBooking(raw: unknown) {
   if (typeof b.requestId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(b.requestId)) throw new Error('Обновите форму и повторите отправку')
   const utm: Record<string, string> = {}
   if (b.utm && typeof b.utm === 'object' && !Array.isArray(b.utm)) {
-    for (const [key,value] of Object.entries(b.utm).sort(([a],[c])=>a.localeCompare(c))) if (/^(utm_(source|medium|campaign|term|content)|yclid)$/.test(key) && typeof value === 'string') utm[key] = value.slice(0, 300)
+    for (const [key,value] of Object.entries(b.utm).sort(([a],[c])=>a.localeCompare(c))) if (/^(utm_(source|medium|campaign|term|content)|yclid|group_id)$/.test(key) && typeof value === 'string') utm[key] = value.slice(0, 300)
   }
   return {name,contact,comment,tariff: String(tariff),players,invitedBy,source:b.source,requestId:b.requestId,utm}
 }

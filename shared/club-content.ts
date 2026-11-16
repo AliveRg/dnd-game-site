@@ -9,3 +9,6 @@ export const CLUB_PHOTOS = [
  ['06-room','Игровая комната клуба с картой на столе'],
  ['07-world-maps','Ведущий показывает карты игровых миров']
 ].map(([name,alt])=>({url:`/images/club/${name}-960.webp`,alt}))
+
+export const CLUB_CITY = 'Белгород'
+export const CLUB_ADDRESS = 'проспект Славы, 9Г'
