@@ -79,19 +79,58 @@ const roles = computed(() => {
     { name: 'Танк', v: Math.max(0.04, Math.min(1, n(h.scores.con) * 0.5 + ((h.ac - 10) / 10) * 0.5)) }
   ]
 })
-const heroText = computed(() => {
+// Печать: отдельная страница с компактным листом на один А4 (светлый фон, тёмный текст)
+const esc = (v: unknown) => String(v ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!)
+function printSheet() {
   const h = hero.value
-  if (!h) return ''
-  return `Мой герой: ${h.name} (${h.species}, ${h.klass}, ${h.background}), ${RARITY[h.rarity].name.toLowerCase()}. ` +
-    ABILITIES.map((a) => `${a.short} ${h.scores[a.id]}`).join(', ') + `; КД ${h.ac}, хиты ${h.hp}.`
-})
-function bookWithHero() {
-  if (!hero.value) return
-  try { sessionStorage.setItem('hero', heroText.value) } catch {}
-  window.dispatchEvent(new CustomEvent('hero-ready', { detail: heroText.value }))
-  scrollToEl('#booking')
+  if (!h) return
+  const li = (a: string[]) => a.map((x) => `<li>${esc(x)}</li>`).join('')
+  const abil = ABILITIES.map((a) => `<div class="ab"><small>${a.name}</small><b>${fmt(h.mods[a.id])}</b><i>${h.scores[a.id]}</i></div>`).join('')
+  const saves = h.saves.map((x) => `<li><span class="dot${x.prof ? ' on' : ''}"></span><b>${fmt(x.val)}</b> ${esc(ABILITIES.find((a) => a.id === x.ab)!.name)}</li>`).join('')
+  const skills = h.skills.map((x) => `<li><span class="dot${x.prof ? ' on' : ''}${x.expert ? ' ex' : ''}"></span><b>${fmt(x.val)}</b> ${esc(x.name)} <em>${abilityShort(x.ab)}</em></li>`).join('')
+  const atk = h.attacks.map((a) => `<tr><td>${esc(a.name)}${a.note ? `<em> ${esc(a.note)}</em>` : ''}</td><td><b>${esc(a.bonus)}</b></td><td>${esc(a.dmg)}</td></tr>`).join('')
+  const spell = h.spell ? `<section><h4>Заклинания · ${esc(h.spell.label)} · Сл ${h.spell.dc} · атака ${fmt(h.spell.atk)} · ячеек 1 круга: ${h.spell.slots}</h4>
+    <p><b>Заговоры:</b> ${esc(h.spell.cantrips.join(', ') || '-')}</p><p><b>1 круг:</b> ${esc(h.spell.spells.join(', '))}</p></section>` : ''
+  const html = `<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>${esc(h.name)} - лист героя</title><style>
+  @page { size: A4; margin: 9mm; }
+  * { box-sizing: border-box; } body { margin: 0; font: 10px/1.36 Georgia, 'Times New Roman', serif; color: #1d1107; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  h1 { margin: 0; font-size: 22px; } h4 { margin: 0 0 3px; font: 700 8px Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #7e4515; border-bottom: 1px solid #b16f23; padding-bottom: 2px; }
+  .top { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #7e4515; padding-bottom: 4px; }
+  .meta { font: 10px Arial, sans-serif; } .rar { font: 700 9px Arial, sans-serif; padding: 2px 8px; border: 1px solid #7e4515; border-radius: 99px; }
+  .vit { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin: 6px 0; }
+  .vit div { border: 1px solid #b16f23; border-radius: 5px; text-align: center; padding: 3px 2px; } .vit b { display: block; font-size: 15px; } .vit small, .ab small { font: 7px Arial, sans-serif; text-transform: uppercase; letter-spacing: .06em; color: #6b4a24; }
+  .grid { display: grid; grid-template-columns: 70px 150px 1fr; gap: 8px; }
+  .ab { border: 1px solid #b16f23; border-radius: 6px; text-align: center; padding: 3px; margin-bottom: 4px; } .ab b { display: block; font-size: 16px; } .ab i { font-style: normal; font: 700 9px Arial; }
+  ul { list-style: none; margin: 0; padding: 0; } li { padding: .6px 0; } .dot { display: inline-block; width: 7px; height: 7px; border: 1px solid #1d1107; border-radius: 50%; margin-right: 3px; vertical-align: -1px; } .dot.on { background: #1d1107; } .dot.ex { background: #b16f23; border-color: #b16f23; }
+  em { font-style: normal; color: #8a6a40; font-size: 8px; } section { margin-bottom: 6px; } p { margin: 0 0 2px; }
+  table { width: 100%; border-collapse: collapse; } td { border-bottom: 1px solid #e2cfa6; padding: 1.5px 2px; vertical-align: top; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .foot { margin-top: 4px; font: 8px Arial; color: #8a6a40; text-align: right; }
+  </style></head><body>
+  <div class="top"><div><h1>${esc(h.name)}</h1><div class="meta">${esc(h.klass)} · ${esc(h.species)} · ${esc(h.background)} · ${esc(h.alignment)} · 1 уровень · опыт ${esc(h.xp)}</div></div><span class="rar">${RARITY[h.rarity].name} герой · d20 = ${h.d20}</span></div>
+  <div class="vit"><div><b>${h.ac}</b><small>КД</small></div><div><b>${h.hp}</b><small>Хиты</small></div><div><b>${fmt(h.init)}</b><small>Инициатива</small></div><div><b>${h.speed} фт</b><small>Скорость</small></div>
+    <div><b>${fmt(h.prof)}</b><small>Мастерство</small></div><div><b>${h.passive}</b><small>Пасс. внимат.</small></div><div><b>${esc(h.hd)}</b><small>Кости хитов</small></div><div><b>${h.inspiration ? '★' : '-'}</b><small>Вдохновение</small></div></div>
+  <div class="grid">
+    <div>${abil}</div>
+    <div><section><h4>Спасброски</h4><ul>${saves}</ul></section><section><h4>Навыки</h4><ul>${skills}</ul></section></div>
+    <div>
+      <section><h4>Атаки</h4><table>${atk}</table></section>
+      <section><h4>Действия</h4><p><b>Действие:</b> ${esc(h.actions.action.join(', '))}</p><p><b>Бонусное:</b> ${esc(h.actions.bonus.join(', ') || '-')}</p><p><b>Реакция:</b> ${esc(h.actions.reaction.join(', '))}</p></section>
+      <section><h4>Умения и черты</h4><ul>${li(h.features)}</ul></section>
+      ${h.boons.length ? `<section><h4>Благословения</h4><ul>${li(h.boons)}</ul></section>` : ''}
+      ${spell}
+      <div class="two"><section><h4>Снаряжение</h4><ul>${li(h.equipment)}</ul><p>${h.coins.mm} ММ · ${h.coins.sm} СМ · ${h.coins.zm} ЗМ · ${h.coins.pm} ПМ</p></section>
+      <section><h4>Владения и языки</h4><p>${esc(h.proficiencies)}</p><p><b>Языки:</b> ${esc(h.languages.join(', '))}</p></section></div>
+      <section><h4>Внешность</h4><p>${esc(h.look)}</p></section>
+      <section><h4>Предыстория</h4><p>${esc(h.story)}</p></section>
+    </div>
+  </div>
+  <div class="foot">Хижина Всякой Всячины · генератор героя D&amp;D 5e</div>
+  <script>window.onload = () => { window.print(); setTimeout(() => window.close(), 300) }<\/script>
+  </body></html>`
+  const w = window.open('', '_blank', 'width=900,height=1200')
+  if (!w) return
+  w.document.open(); w.document.write(html); w.document.close()
 }
-const printSheet = () => window.print()
 const initials = (n: string) => { const w = n.replace(/[«»"]/g, '').split(/\s+/).filter(Boolean); return ((w[0]?.[0] ?? '') + (w.length > 1 ? w[w.length - 1]![0] : '')).toUpperCase() }
 const skillsOf = computed(() => hero.value?.skills ?? SKILLS.map((s) => ({ ...s, prof: false, expert: false, val: 0 })))
 </script>
@@ -107,23 +146,23 @@ const skillsOf = computed(() => hero.value?.skills ?? SKILLS.map((s) => ({ ...s,
       <div class="flex min-w-0 flex-1 flex-col gap-4">
         <div class="flex flex-wrap items-center gap-3">
           <button type="button" class="hg-roll" :disabled="rolling" @click="roll">
-            <span class="hg-roll-ico" :class="rolling && 'spin'" aria-hidden="true">🎲</span>{{ rolling ? 'Кости катятся…' : hero ? 'Перебросить героя' : 'Бросить кости' }}
+            <img src="/art/decor-dice.webp" alt="" class="hg-roll-ico" />{{ rolling ? 'Кости катятся…' : hero ? 'Перебросить героя' : 'Бросить кости' }}
           </button>
           <p class="text-sm text-ash">4d6, меньший кубик отбрасывается, ×6. Выпавшее нельзя править - только перебросить.</p>
         </div>
         <!-- шансы редкости: 75 / 20 / 5 и отметка выпавшего d20 -->
         <div>
           <div class="hg-odds" aria-label="Шансы редкости: обычный 75%, редкий 20%, легендарный 5%">
-            <span style="flex: 75; background: #959595">Обычный · 75%</span>
-            <span style="flex: 20; background: #DF0000">Редкий · 20%</span>
-            <span style="flex: 5; background: #DF0000" title="Легендарный · 5% · d20 = 20">5%</span>
+            <span style="flex: 75; background: #b3a285">Обычный · 75%</span>
+            <span style="flex: 20; background: #e0a24a">Редкий · 20%</span>
+            <span style="flex: 5; background: #c0392b" title="Легендарный · 5% · d20 = 20">5%</span>
             <i v-if="hero" class="hg-mark" :style="{ left: `${((hero.d20 - 0.5) / 20) * 100}%` }"><b>{{ hero.d20 }}</b></i>
           </div>
         </div>
         <div class="hg-stats">
           <div><b>{{ stats.rolls }}</b><span>бросков</span></div>
-          <div><b style="color: #DF0000">{{ stats.rare }}</b><span>редких</span></div>
-          <div><b style="color: #ff4a3a">{{ stats.legendary }}</b><span>легендарных</span></div>
+          <div><b style="color: #e0a24a">{{ stats.rare }}</b><span>редких</span></div>
+          <div><b style="color: #e5604a">{{ stats.legendary }}</b><span>легендарных</span></div>
           <div><b>{{ stats.best || dash }}</b><span>лучшая сумма</span></div>
         </div>
       </div>
@@ -153,7 +192,7 @@ const skillsOf = computed(() => hero.value?.skills ?? SKILLS.map((s) => ({ ...s,
     <div class="hg-charts" :class="!hero && 'opacity-50'">
       <div class="hg-chart">
         <p class="hg-h">Профиль характеристик</p>
-        <HeroRadar :values="values" :color="rar?.color === '#959595' ? '#EEE5CE' : rar?.color" />
+        <HeroRadar :values="values" :color="rar?.color === '#b3a285' ? '#e9dcc0' : rar?.color" />
       </div>
       <div class="hg-chart">
         <p class="hg-h">Сила броска</p>
@@ -182,7 +221,7 @@ const skillsOf = computed(() => hero.value?.skills ?? SKILLS.map((s) => ({ ...s,
     <!-- ЛИСТ ПЕРСОНАЖА: страница 1 -->
     <article :key="revealKey" class="hs hs-print" :class="[rolling && 'hs-dim', hero && `hs-${hero.rarity}`]">
       <header class="hs-head hs-in">
-        <div class="hs-portrait" :style="{ '--rc': rar?.color ?? '#959595' }">
+        <div class="hs-portrait" :style="{ '--rc': rar?.color ?? '#b3a285' }">
           <span>{{ hero ? initials(hero.name) : '?' }}</span>
           <em>{{ hero?.klass ?? 'класс' }}</em>
         </div>
@@ -191,7 +230,7 @@ const skillsOf = computed(() => hero.value?.skills ?? SKILLS.map((s) => ({ ...s,
           <div class="flex items-center gap-2">
             <input v-if="hero" id="hs-name" v-model="hero.name" class="hs-name" maxlength="40" />
             <span v-else class="hs-name opacity-40">Безымянный</span>
-            <button v-if="hero" type="button" class="hs-reroll" title="Другое имя" @click="hero.name = randomName(hero.species)">🎲</button>
+            <button v-if="hero" type="button" class="hs-reroll" title="Другое имя" @click="hero.name = randomName(hero.species)"><img src="/art/decor-dice.webp" alt="" /></button>
           </div>
           <div class="hs-fields">
             <div><b>{{ hero?.klass ?? dash }}</b><span>Класс</span></div>
@@ -201,9 +240,9 @@ const skillsOf = computed(() => hero.value?.skills ?? SKILLS.map((s) => ({ ...s,
           </div>
         </div>
         <div class="hs-lvl">
-          <div class="hs-house"><small>уровень</small>{{ hero ? 1 : dash }}</div>
+          <div class="hs-house"><img src="/art/ui-level.webp" alt="" class="hs-art" /><b>{{ hero ? 1 : dash }}</b><small>уровень</small></div>
           <div class="hs-xp"><b>{{ hero?.xp ?? '0 / 300' }}</b><span>Опыт</span></div>
-          <div class="hs-insp" :class="hero?.inspiration && 'on'" :title="hero?.inspiration ? 'Есть Героическое вдохновение' : 'Нет вдохновения'">★<span>Вдохновение</span></div>
+          <div class="hs-insp" :class="hero?.inspiration && 'on'" :title="hero?.inspiration ? 'Есть Героическое вдохновение' : 'Нет вдохновения'"><img src="/art/ui-inspiration.webp" alt="" /><span>Вдохновение</span></div>
         </div>
       </header>
 
@@ -212,13 +251,13 @@ const skillsOf = computed(() => hero.value?.skills ?? SKILLS.map((s) => ({ ...s,
         <div class="hs-v"><b>{{ hero ? fmt(hero.prof) : dash }}</b><span>Бонус мастерства</span></div>
         <div class="hs-v"><b>{{ hero?.passive ?? dash }}</b><span>Пассивная внимательность</span></div>
         <div class="hs-v hs-speed">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h5v9l7 3c1.6.7 2 2 2 3.5V20H4V12c0-1 .5-2 1.5-2.5L7 9Z" fill="currentColor" /><path d="M4 18h17" stroke="#F7F2E6" stroke-width="1.5" /></svg>
+          <img src="/art/ui-speed.webp" alt="" class="hs-ico" />
           <b>{{ hero ? `${hero.speed} фт` : dash }}</b><span>Скорость</span><em v-if="hero">{{ hero.altSpeed !== '-' ? hero.altSpeed : 'лазание/плавание ½' }}</em>
         </div>
-        <div class="hs-v hs-shield"><b>{{ hero?.ac ?? dash }}</b><span>КД</span><em v-if="hero">{{ hero.acNote }}</em></div>
-        <div class="hs-v"><svg viewBox="0 0 24 24" class="hs-ico" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7Z" fill="currentColor" /></svg><b>{{ hero ? fmt(hero.init) : dash }}</b><span>Инициатива</span></div>
+        <div class="hs-v hs-shield"><img src="/art/ui-ac.webp" alt="" class="hs-ico" /><b>{{ hero?.ac ?? dash }}</b><span>КД</span><em v-if="hero">{{ hero.acNote }}</em></div>
+        <div class="hs-v"><img src="/art/ui-initiative.webp" alt="" class="hs-ico" /><b>{{ hero ? fmt(hero.init) : dash }}</b><span>Инициатива</span></div>
         <div class="hs-v hs-hp">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11Z" fill="currentColor" /></svg>
+          <img src="/art/ui-hp.webp" alt="" class="hs-ico" />
           <b>{{ hero ? `${hero.hp} / ${hero.hp}` : dash }}</b><span>Хиты: текущие / макс.</span>
         </div>
         <div class="hs-v"><b>0</b><span>Временные хиты</span></div>
@@ -306,16 +345,16 @@ const skillsOf = computed(() => hero.value?.skills ?? SKILLS.map((s) => ({ ...s,
           <h4>Снаряжение</h4>
           <ul class="hs-feat"><li v-for="e in hero?.equipment ?? []" :key="e">{{ e }}</li></ul>
           <div class="hs-coins">
-            <span v-for="c in (['mm', 'sm', 'zm', 'pm'] as const)" :key="c" :class="`c-${c}`"><b>{{ hero?.coins[c] ?? 0 }}</b>{{ { mm: 'ММ', sm: 'СМ', zm: 'ЗМ', pm: 'ПМ' }[c] }}</span>
+            <span v-for="c in (['mm', 'sm', 'zm', 'pm'] as const)" :key="c"><img :src="`/art/ui-coin-${ { mm: 'copper', sm: 'silver', zm: 'gold', pm: 'platinum' }[c] }.webp`" alt="" /><b>{{ hero?.coins[c] ?? 0 }}</b>{{ { mm: 'ММ', sm: 'СМ', zm: 'ЗМ', pm: 'ПМ' }[c] }}</span>
           </div>
         </section>
         <section class="hs-box">
-          <h4>Внешность <button v-if="hero" type="button" class="hs-reroll sm" title="Другая внешность" @click="hero.look = randomLook(hero.species)">🎲</button></h4>
+          <h4>Внешность <button v-if="hero" type="button" class="hs-reroll sm" title="Другая внешность" @click="hero.look = randomLook(hero.species)"><img src="/art/decor-dice.webp" alt="" /></button></h4>
           <textarea v-if="hero" v-model="hero.look" class="hs-text" rows="3" maxlength="400" />
           <p v-else class="hs-p opacity-40">-</p>
         </section>
         <section class="hs-box md:col-span-3">
-          <h4>Предыстория <button v-if="hero" type="button" class="hs-reroll sm" title="Другая предыстория" @click="hero.story = randomStory(hero)">🎲</button></h4>
+          <h4>Предыстория <button v-if="hero" type="button" class="hs-reroll sm" title="Другая предыстория" @click="hero.story = randomStory(hero)"><img src="/art/decor-dice.webp" alt="" /></button></h4>
           <textarea v-if="hero" v-model="hero.story" class="hs-text" rows="3" maxlength="1200" />
           <p v-else class="hs-p opacity-40">-</p>
         </section>
@@ -343,49 +382,50 @@ const skillsOf = computed(() => hero.value?.skills ?? SKILLS.map((s) => ({ ...s,
       <p v-else class="hs-p opacity-40">Здесь появятся заклинания, если герою выпадет класс-заклинатель.</p>
     </article>
 
-    <div class="mt-5 flex flex-wrap justify-end gap-3">
-      <button type="button" class="btn-ghost" :disabled="!hero" @click="printSheet">Распечатать лист</button>
-      <button type="button" class="btn-primary" :disabled="!hero" @click="bookWithHero">Записаться этим героем</button>
+    <div class="mt-6 flex flex-wrap justify-end gap-3 border-t border-[#e0a24a44] pt-5">
+      <button type="button" class="btn-primary" :disabled="!hero" @click="printSheet">Распечатать лист</button>
     </div>
   </div>
 </template>
 
 <style>
-.hg { --rc: #959595; }
-.hg.r-rare { --rc: #DF0000; } .hg.r-legendary { --rc: #DF0000; }
+.hg { --rc: #b3a285; position: relative; padding: 22px; border-radius: 22px; background: url('/art/corner-progression-4-tl.webp') top 4px left 4px / 80px no-repeat, url('/art/corner-progression-4-tr.webp') top 4px right 4px / 80px no-repeat, url('/art/corner-progression-4-bl.webp') bottom 4px left 4px / 80px no-repeat, url('/art/corner-progression-4-br.webp') bottom 4px right 4px / 80px no-repeat, radial-gradient(120% 60% at 50% 0%, #7e451533, #0000 60%), linear-gradient(180deg, #24150a, #120a04);
+  border: 1px solid #a8813c88; box-shadow: inset 0 1px 0 #f2b45a1f, inset 0 0 60px #0007, 0 18px 40px #000a; }
+.hg.r-rare { --rc: #e0a24a; } .hg.r-legendary { --rc: #c0392b; }
+@media (max-width: 640px) { .hg { padding: 14px; } }
 /* Пульт */
-.hg-deck { display: grid; gap: 20px; align-items: center; padding: 20px; border-radius: 18px; border: 1px solid #3a3333;
-  background: linear-gradient(180deg, #110e0ee6, #040404f2); box-shadow: 0 10px 30px #000a; }
+.hg-deck { display: grid; gap: 20px; align-items: center; padding: 4px 0 18px; border-bottom: 1px solid #e0a24a44; }
 @media (min-width: 1024px) { .hg-deck { grid-template-columns: auto 1fr 260px; } }
 .hg-die { display: flex; align-items: center; gap: 14px; }
-.hg-cap { font-family: var(--font-display); font-size: 20px; line-height: 1; color: #F7F2E6; } .hg-cap span { font-family: var(--font-sans); font-size: 12px; color: #959595; }
-.hg-roll { display: inline-flex; align-items: center; gap: 10px; padding: 14px 26px; border-radius: 14px; font-size: 18px; font-weight: 800; color: #fff;
-  background: linear-gradient(180deg, #ff3a2a, #DF0000 55%, #a30000); box-shadow: inset 0 1px 0 #fff6, 0 4px 0 #6a0000, 0 0 24px #DF000066; transition: transform .15s, box-shadow .2s, filter .2s; }
-.hg-roll:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.08); box-shadow: inset 0 1px 0 #fff6, 0 6px 0 #6a0000, 0 0 34px #DF000099; }
-.hg-roll:active:not(:disabled) { transform: translateY(2px); box-shadow: inset 0 1px 0 #fff6, 0 1px 0 #6a0000; }
+.hg-cap { font-family: var(--font-display); font-size: 20px; line-height: 1; color: #f3e6c8; } .hg-cap span { font-family: var(--font-sans); font-size: 12px; color: #b3a285; }
+.hg-roll { display: inline-flex; align-items: center; gap: 10px; padding: 14px 26px; border-radius: 14px; font-size: 18px; font-weight: 800; color: #1d1107;
+  background: linear-gradient(180deg, #f6c873, #e0a24a 55%, #b16f23); box-shadow: inset 0 1px 0 #fff6, 0 4px 0 #5a3010, 0 0 24px #e0a24a66; transition: transform .15s, box-shadow .2s, filter .2s; }
+.hg-roll:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.08); box-shadow: inset 0 1px 0 #fff6, 0 6px 0 #5a3010, 0 0 34px #e0a24a99; }
+.hg-roll:active:not(:disabled) { transform: translateY(2px); box-shadow: inset 0 1px 0 #fff6, 0 1px 0 #5a3010; }
 .hg-roll:disabled { filter: saturate(.6); cursor: progress; }
-.hg-roll-ico { display: inline-block; font-size: 22px; } .hg-roll-ico.spin { animation: hg-spin .5s linear infinite; }
+.hg-roll-ico { display: inline-block; width: 30px; height: 30px; object-fit: contain; }
 @keyframes hg-spin { to { transform: rotate(360deg); } }
-.hg-odds { position: relative; display: flex; height: 28px; margin-bottom: 12px; border-radius: 10px; overflow: visible; font-size: 11px; font-weight: 800; color: #040404; }
+.hg-odds { position: relative; display: flex; height: 28px; margin-bottom: 12px; border-radius: 10px; overflow: visible; font-size: 11px; font-weight: 800; color: #100904; }
 .hg-odds > span { display: grid; place-items: center; white-space: nowrap; overflow: hidden; box-shadow: inset 0 -3px 0 #0003; }
 .hg-odds > span:first-child { border-radius: 10px 0 0 10px; } .hg-odds > span:nth-child(3) { border-radius: 0 10px 10px 0; color: #fff; }
-.hg-mark { position: absolute; top: -9px; bottom: -9px; width: 3px; translate: -50% 0; background: #F7F2E6; border-radius: 2px; transition: left .6s cubic-bezier(.3, 1.4, .5, 1); box-shadow: 0 0 8px #fff; }
-.hg-mark b { position: absolute; top: auto; bottom: -22px; left: 50%; translate: -50% 0; font: 800 12px var(--font-sans); color: #F7F2E6; }
+.hg-mark { position: absolute; top: -9px; bottom: -9px; width: 3px; translate: -50% 0; background: #f3e6c8; border-radius: 2px; transition: left .6s cubic-bezier(.3, 1.4, .5, 1); box-shadow: 0 0 8px #fff; }
+.hg-mark b { position: absolute; top: auto; bottom: -22px; left: 50%; translate: -50% 0; font: 800 12px var(--font-sans); color: #f3e6c8; }
 .hg-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.hg-stats div, .hg-mini { display: flex; flex-direction: column; align-items: center; padding: 8px 4px; border-radius: 12px; background: #0006; border: 1px solid #2a2424; }
-.hg-stats b, .hg-mini b { font: 700 24px/1 var(--font-display); color: #F7F2E6; } .hg-stats span, .hg-mini span { font-size: 10px; color: #959595; text-transform: uppercase; letter-spacing: .08em; text-align: center; }
-.hg-h { margin-bottom: 8px; font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: #EEE5CE; }
+.hg-stats div, .hg-mini { display: flex; flex-direction: column; align-items: center; padding: 8px 4px; border-radius: 12px; background: #ffffff04; border: 1px solid #e0a24a44; }
+.hg-stats b, .hg-mini b { font: 700 24px/1 var(--font-display); color: #f3e6c8; } .hg-stats span, .hg-mini span { font-size: 10px; color: #b3a285; text-transform: uppercase; letter-spacing: .08em; text-align: center; }
+.hg-h { margin-bottom: 8px; font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: #f2b45a; text-shadow: 0 0 10px #e0a24a88; }
 .hg-hist { display: flex; flex-direction: column; gap: 4px; max-height: 210px; overflow: auto; scrollbar-width: thin; }
-.hg-hist-i { display: grid; grid-template-columns: 10px 1fr auto; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 8px; text-align: left; font-size: 13px; color: #F7F2E6; transition: background .2s; }
-.hg-hist-i:hover, .hg-hist-i.on { background: #ffffff10; } .hg-hist-i i { width: 10px; height: 10px; border-radius: 3px; rotate: 45deg; } .hg-hist-i em { font-style: normal; font-size: 11px; color: #959595; }
+.hg-hist-i { display: grid; grid-template-columns: 10px 1fr auto; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 8px; text-align: left; font-size: 13px; color: #f3e6c8; transition: background .2s; }
+.hg-hist-i:hover, .hg-hist-i.on { background: #ffffff10; } .hg-hist-i i { width: 10px; height: 10px; border-radius: 3px; rotate: 45deg; } .hg-hist-i em { font-style: normal; font-size: 11px; color: #b3a285; }
 /* Печать редкости */
 .hg-stamp-row { display: grid; place-items: center; min-height: 92px; margin: 18px 0 6px; }
-.hg-stamp { position: relative; display: flex; flex-direction: column; align-items: center; padding: 10px 34px 12px; border-radius: 14px; color: #fff;
-  background: var(--rc); box-shadow: inset 0 -5px 0 #0003, 0 0 0 3px #040404, 0 0 0 5px var(--rc), 0 0 40px color-mix(in srgb, var(--rc) 60%, transparent); }
+.hg-stamp { position: relative; display: flex; flex-direction: column; align-items: center; padding: 10px 34px 12px; border-radius: 14px; color: #1d1107;
+  background: var(--rc); box-shadow: inset 0 -5px 0 #0003, 0 0 0 3px #100904, 0 0 0 5px var(--rc), 0 0 40px color-mix(in srgb, var(--rc) 60%, transparent); }
+.hg.r-legendary .hg-stamp { color: #fff3dc; }
 .hg-stamp b { font: 700 30px/1 var(--font-display); letter-spacing: .04em; text-shadow: 0 2px 0 #0004; }
 .hg-stamp small { margin-top: 3px; font-size: 11px; font-weight: 700; opacity: .9; }
-.hg-stamp.ghost { background: #0005; color: #959595; box-shadow: 0 0 0 1px #2a2424; font-size: 15px; padding: 16px 26px; }
-.hg-stamp-gem { position: absolute; top: -12px; width: 30px; height: 18px; background: #F7F2E6; clip-path: polygon(22% 0, 78% 0, 100% 50%, 78% 100%, 22% 100%, 0 50%); }
+.hg-stamp.ghost { background: #0005; color: #b3a285; box-shadow: 0 0 0 1px #45250e; font-size: 15px; padding: 16px 26px; }
+.hg-stamp-gem { position: absolute; top: -12px; width: 30px; height: 18px; background: #f3e6c8; clip-path: polygon(22% 0, 78% 0, 100% 50%, 78% 100%, 22% 100%, 0 50%); }
 .hg-flare { position: absolute; inset: -30px -60px; z-index: -1; pointer-events: none; border-radius: 50%;
   background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--rc) 45%, transparent) 0 6deg, #0000 6deg 18deg); animation: tarot-rays 18s linear infinite;
   -webkit-mask: radial-gradient(closest-side, #000 30%, #0000); mask: radial-gradient(closest-side, #000 30%, #0000); }
@@ -394,108 +434,105 @@ const skillsOf = computed(() => hero.value?.skills ?? SKILLS.map((s) => ({ ...s,
 /* Графики */
 .hg-charts { display: grid; gap: 16px; margin-bottom: 20px; transition: opacity .3s; }
 @media (min-width: 900px) { .hg-charts { grid-template-columns: 1.1fr 1fr 1fr; } }
-.hg-chart { padding: 16px 18px; border-radius: 16px; background: #0005; border: 1px solid #2a2424; }
+.hg-chart { padding: 16px 18px; border-radius: 16px; background: #ffffff04; border: 1px solid #e0a24a44; box-shadow: inset 0 0 22px #e0a24a10; }
 .hg-chart .hero-radar { max-width: 250px; margin: 0 auto; display: block; }
 .hg-gauge { position: relative; width: 190px; margin: 6px auto 4px; }
 .hg-gauge svg { width: 100%; display: block; } .hg-gauge path { fill: none; stroke-width: 12; stroke-linecap: round; }
 .g-bg { stroke: #ffffff14; } .g-fg { stroke: var(--rc); stroke-dasharray: 100; stroke-dashoffset: calc(100 - var(--p) * 100); transition: stroke-dashoffset .9s cubic-bezier(.2, .8, .2, 1); filter: drop-shadow(0 0 6px var(--rc)); }
-.hg-gauge b { position: absolute; left: 0; right: 0; bottom: 4px; text-align: center; font: 700 38px/1 var(--font-display); color: #F7F2E6; } .hg-gauge small { font-size: 18px; }
-.hg-bar { display: grid; grid-template-columns: 70px 1fr; align-items: center; gap: 10px; font-size: 13px; color: #c9c2b4; }
-.hg-bar i { height: 10px; border-radius: 99px; background: #ffffff10; overflow: hidden; } .hg-bar em { display: block; height: 100%; border-radius: inherit; background: #959595; transition: width .8s cubic-bezier(.2, .8, .2, 1); }
+.hg-gauge b { position: absolute; left: 0; right: 0; bottom: 4px; text-align: center; font: 700 38px/1 var(--font-display); color: #f3e6c8; } .hg-gauge small { font-size: 18px; }
+.hg-bar { display: grid; grid-template-columns: 70px 1fr; align-items: center; gap: 10px; font-size: 13px; color: #d6c6a6; }
+.hg-bar i { height: 10px; border-radius: 99px; background: #ffffff10; overflow: hidden; } .hg-bar em { display: block; height: 100%; border-radius: inherit; background: #b3a285; transition: width .8s cubic-bezier(.2, .8, .2, 1); }
 .hg-bar.main { color: #fff; font-weight: 700; } .hg-bar.main em { background: var(--rc); box-shadow: 0 0 10px var(--rc); }
 
-/* --- Лист персонажа: пергамент, чёрный текст, красные акценты (цвета D&D) --- */
-.hs { position: relative; margin-top: 4px; padding: 22px; border-radius: 18px; color: #040404; background: radial-gradient(120% 80% at 20% 0%, #F7F2E6, #EEE5CE 70%);
-  box-shadow: 0 0 0 3px #040404, 0 0 0 6px #EEE5CE, 0 0 0 8px var(--rc), 0 20px 50px #000c; transition: opacity .3s, filter .3s; }
-.hs + .hs { margin-top: 34px; }
-.hs-legendary { box-shadow: 0 0 0 3px #040404, 0 0 0 6px #EEE5CE, 0 0 0 8px #DF0000, 0 0 40px #DF000088, 0 20px 50px #000c; }
-.hs-dim { opacity: .55; filter: saturate(.6); }
-.hs-in { animation: hs-in .6s cubic-bezier(.2, .7, .2, 1) both; }
-.hs-in:nth-child(2) { animation-delay: .08s; } .hs-in:nth-child(3) { animation-delay: .16s; } .hs-in:nth-child(4) { animation-delay: .24s; }
-.hs-body > .hs-in:nth-child(2) { animation-delay: .2s; } .hs-body > .hs-in:nth-child(3) { animation-delay: .3s; }
-@keyframes hs-in { from { opacity: 0; transform: translateY(14px); } }
-.hs-head { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; padding-bottom: 14px; border-bottom: 3px solid #DF0000; }
-.hs-portrait { position: relative; flex: none; width: 104px; height: 104px; border-radius: 50%; display: grid; place-items: center; background: #040404; color: #F7F2E6;
-  box-shadow: 0 0 0 4px #EEE5CE, 0 0 0 7px var(--rc); }
-.hs-portrait span { font: 700 40px/1 var(--font-display); } .hs-portrait em { position: absolute; bottom: -10px; padding: 2px 10px; border-radius: 99px; font: 800 10px var(--font-sans); font-style: normal; text-transform: uppercase; letter-spacing: .08em; background: #DF0000; color: #fff; }
-.hs-lbl { font-size: 10px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: #DF0000; }
-.hs-name { width: 100%; min-width: 0; font: 700 clamp(24px, 6vw, 34px)/1.1 var(--font-display); color: #040404; background: transparent; border-bottom: 2px dashed #04040455; outline: none; padding: 2px 0; }
-.hs-name:focus { border-bottom-color: #DF0000; }
-.hs-reroll { flex: none; width: 34px; height: 34px; border-radius: 10px; background: #040404; color: #fff; font-size: 16px; transition: transform .2s, background .2s; }
-.hs-reroll:hover { background: #DF0000; transform: rotate(-12deg); } .hs-reroll.sm { width: 24px; height: 24px; font-size: 12px; border-radius: 7px; margin-left: 6px; vertical-align: middle; }
-.hs-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 18px; margin-top: 10px; }
+/* --- Лист персонажа: тёмный неон, без белого фона. Всё внутри одного большого блока .hg --- */
+.hs { position: relative; margin-top: 8px; padding: 22px 0 0; color: #f3e6c8; border-top: 1px solid #e0a24a44; transition: opacity var(--t) var(--ease), filter var(--t) var(--ease); }
+.hs + .hs { margin-top: 26px; }
+.hs-dim { opacity: .45; filter: saturate(.5); }
+.hs-in { animation: hs-in var(--t-slow) var(--ease) both; }
+.hs-in:nth-child(2) { animation-delay: .06s; } .hs-in:nth-child(3) { animation-delay: .12s; } .hs-in:nth-child(4) { animation-delay: .18s; }
+.hs-body > .hs-in:nth-child(2) { animation-delay: .15s; } .hs-body > .hs-in:nth-child(3) { animation-delay: .22s; }
+@keyframes hs-in { from { opacity: 0; transform: translateY(12px); } }
+.hs-head { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; padding-bottom: 16px; border-bottom: 1px solid #e0a24a33; }
+.hs-portrait { position: relative; flex: none; width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle, #2f190a, #140b05); color: #f3e6c8;
+  box-shadow: 0 0 0 2px var(--rc), 0 0 22px color-mix(in srgb, var(--rc) 70%, transparent), inset 0 0 18px color-mix(in srgb, var(--rc) 40%, transparent); }
+.hs-portrait span { font: 700 36px/1 var(--font-display); text-shadow: 0 0 12px var(--rc); }
+.hs-portrait em { position: absolute; bottom: -10px; padding: 2px 10px; border-radius: 99px; font: 800 10px var(--font-sans); font-style: normal; text-transform: uppercase; letter-spacing: .08em; background: #e0a24a; color: #fff; box-shadow: 0 0 12px #e0a24aaa; }
+.hs-lbl { font-size: 10px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: #f2b45a; }
+.hs-name { width: 100%; min-width: 0; font: 700 clamp(24px, 6vw, 34px)/1.1 var(--font-display); color: #f3e6c8; background: transparent; border-bottom: 1px dashed #e0a24a66; outline: none; padding: 2px 0; text-shadow: 0 0 14px #e0a24a55; }
+.hs-name:focus { border-bottom-color: #e0a24a; }
+.hs-reroll { flex: none; width: 34px; height: 34px; border-radius: 10px; background: #2a170a; border: 1px solid #e0a24a88; font-size: 16px; transition: transform var(--t) var(--ease), box-shadow var(--t) var(--ease); }
+.hs-reroll:hover { transform: rotate(-12deg); box-shadow: 0 0 14px #e0a24aaa; } .hs-reroll img { width: 78%; height: 78%; margin: auto; object-fit: contain; } .hs-reroll.sm { width: 24px; height: 24px; font-size: 12px; border-radius: 7px; margin-left: 6px; vertical-align: middle; }
+.hs-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 18px; margin-top: 10px; }
 @media (min-width: 768px) { .hs-fields { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-.hs-fields div { display: flex; flex-direction: column; border-bottom: 1.5px solid #040404; padding-bottom: 2px; }
-.hs-fields b { font-size: 15px; font-weight: 700; } .hs-fields span, .hs-v > span, .hs-xp span { font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #6b5a40; }
+.hs-fields div { display: flex; flex-direction: column; border-bottom: 1px solid #e0a24a44; padding-bottom: 3px; }
+.hs-fields b { font-size: 15px; font-weight: 700; }
+.hs-fields span, .hs-v > span, .hs-xp span { font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #b3a285; }
 .hs-lvl { display: flex; align-items: center; gap: 12px; }
-.hs-house { width: 62px; height: 66px; padding-top: 16px; display: flex; flex-direction: column; align-items: center; font: 700 30px/1 var(--font-display); color: #fff; background: #DF0000;
-  clip-path: polygon(50% 0, 100% 28%, 100% 100%, 0 100%, 0 28%); }
-.hs-house small { font: 800 8px var(--font-sans); letter-spacing: .1em; text-transform: uppercase; opacity: .85; margin-bottom: 2px; }
-.hs-xp { display: flex; flex-direction: column; min-width: 110px; padding: 8px 12px; border: 2px solid #040404; border-radius: 12px; }
+.hs-house { position: relative; width: 66px; height: 70px; display: grid; place-items: center; text-align: center; }
+.hs-house .hs-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 8px #000a); }
+.hs-house b { position: relative; margin-top: 4px; font: 700 26px/1 var(--font-display); color: #fff3dc; text-shadow: 0 2px 4px #000; }
+.hs-house small { position: absolute; bottom: -12px; left: 50%; translate: -50% 0; font: 800 8px var(--font-sans); letter-spacing: .1em; text-transform: uppercase; color: #b3a285; white-space: nowrap; }
+.hs-insp { display: flex; flex-direction: column; align-items: center; gap: 2px; } .hs-insp img { width: 40px; height: 40px; filter: grayscale(1) brightness(.5); opacity: .5; transition: filter var(--t) var(--ease), opacity var(--t) var(--ease); }
+.hs-insp.on img { filter: drop-shadow(0 0 10px #e0a24a); opacity: 1; } .hs-insp span { font-size: 8px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #b3a285; }
+.hs-ico { width: 34px; height: 34px; object-fit: contain; filter: drop-shadow(0 3px 6px #000a); }
+.hs-shield { border-color: #a8813c88; }
+.hs-coins span { display: flex; align-items: center; gap: 5px; padding: 3px 10px 3px 3px; border-radius: 99px; font-size: 11px; font-weight: 800; border: 1px solid #a8813c55; background: #0003; }
+.hs-coins img { width: 26px; height: 26px; } .hs-coins b { font-size: 13px; color: #f3e6c8; }
+.hs-xp { display: flex; flex-direction: column; min-width: 110px; padding: 8px 12px; border: 1px solid #e0a24a66; border-radius: 12px; box-shadow: inset 0 0 14px #e0a24a18; }
 .hs-xp b { font: 700 22px/1 var(--font-display); }
-.hs-insp { display: flex; flex-direction: column; align-items: center; font-size: 30px; line-height: 1; color: #04040433; }
-.hs-insp.on { color: #DF0000; text-shadow: 0 0 10px #DF000066; } .hs-insp span { font-size: 8px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #6b5a40; }
 .hs-vitals { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 16px 0; }
 @media (min-width: 640px) { .hs-vitals { grid-template-columns: repeat(3, 1fr); } }
 @media (min-width: 1100px) { .hs-vitals { grid-template-columns: repeat(9, 1fr); } }
-.hs-v { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 84px; padding: 10px 6px; text-align: center; border: 2px solid #040404; border-radius: 12px; background: #F7F2E6; }
-.hs-v b { font: 700 26px/1 var(--font-display); } .hs-v em { font-size: 9px; font-style: normal; color: #6b5a40; line-height: 1.2; }
-.hs-v svg, .hs-ico { width: 22px; height: 22px; color: #DF0000; }
-.hs-shield { border: 0; background: #040404; color: #F7F2E6; clip-path: polygon(0 0, 100% 0, 100% 62%, 50% 100%, 0 62%); padding-bottom: 22px; }
-.hs-shield > span, .hs-shield em { color: #EEE5CE; }
-.hs-hp { border-color: #DF0000; } .hs-hp b { font-size: 24px; }
-.hs-death i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #040404; } .hs-death i.bad { border-color: #DF0000; } .hs-death i.sep { width: 2px; border-radius: 0; border: 0; background: #04040455; }
+.hs-v { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 84px; padding: 10px 6px; text-align: center;
+  border: 1px solid #e0a24a44; border-radius: 12px; background: #ffffff05; box-shadow: inset 0 0 18px #e0a24a12; transition: border-color var(--t) var(--ease), box-shadow var(--t) var(--ease); }
+.hs-v:hover { border-color: #e0a24aaa; box-shadow: inset 0 0 18px #e0a24a22, 0 0 14px #e0a24a44; }
+.hs-v b { font: 700 26px/1 var(--font-display); } .hs-v em { font-size: 9px; font-style: normal; color: #b3a285; line-height: 1.2; }
+.hs-hp { border-color: #e0a24aaa; box-shadow: inset 0 0 22px #e0a24a30, 0 0 12px #e0a24a33; } .hs-hp b { font-size: 24px; }
+.hs-death i { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid #b3a285; } .hs-death i.bad { border-color: #e0a24a; } .hs-death i.sep { width: 1px; border-radius: 0; border: 0; background: #ffffff33; }
 .hs-body { display: grid; gap: 14px; }
 @media (min-width: 1024px) { .hs-body { grid-template-columns: 150px 270px 1fr; } }
 .hs-abs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; align-content: start; }
 @media (min-width: 1024px) { .hs-abs { grid-template-columns: 1fr; } }
-.hs-ab { position: relative; display: flex; flex-direction: column; align-items: center; padding: 8px 6px 10px; border: 2px solid #040404; border-radius: 14px 14px 30px 30px; background: #F7F2E6; }
-.hs-ab-n { font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
-.hs-ab-mod { font: 700 34px/1 var(--font-display); margin-top: 2px; }
-.hs-ab-score { margin-top: 2px; min-width: 44px; padding: 1px 8px; border-radius: 99px; border: 2px solid #040404; background: #fff; text-align: center; font-weight: 800; font-size: 15px; }
+.hs-ab { position: relative; display: flex; flex-direction: column; align-items: center; padding: 8px 6px 10px; border: 1px solid #e0a24a55; border-radius: 14px 14px 30px 30px; background: #ffffff05; box-shadow: inset 0 0 16px #e0a24a14; }
+.hs-ab-n { font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #d6c6a6; }
+.hs-ab-mod { font: 700 34px/1 var(--font-display); margin-top: 2px; text-shadow: 0 0 12px #e0a24a77; }
+.hs-ab-score { margin-top: 2px; min-width: 44px; padding: 1px 8px; border-radius: 99px; border: 1px solid #e0a24a88; background: #23150a; text-align: center; font-weight: 800; font-size: 15px; }
 .hs-dice { display: flex; gap: 3px; margin-top: 6px; }
-.hs-dice i { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 5px; font: 800 12px/1 var(--font-sans); font-style: normal; color: #fff; background: #040404; }
-.hs-dice i.drop { background: #04040433; color: #040404; text-decoration: line-through; }
-.hs-ab.rolling .hs-dice i { background: #DF0000; animation: hs-tumble .22s linear infinite; }
+.hs-dice i { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 5px; font: 800 12px/1 var(--font-sans); font-style: normal; color: #fff; background: #2f190a; border: 1px solid #e0a24a88; }
+.hs-dice i.drop { background: transparent; border-color: #ffffff22; color: #ffffff55; text-decoration: line-through; }
+.hs-ab.rolling .hs-dice i { background: #e0a24a; box-shadow: 0 0 10px #e0a24a; animation: hs-tumble .22s linear infinite; }
 .hs-ab.rolling .hs-dice i:nth-child(2) { animation-delay: -.05s; } .hs-ab.rolling .hs-dice i:nth-child(3) { animation-delay: -.1s; } .hs-ab.rolling .hs-dice i:nth-child(4) { animation-delay: -.15s; }
-.hs-ab.rolling .hs-ab-mod { color: #DF0000; animation: hs-shake .12s infinite; }
+.hs-ab.rolling .hs-ab-mod { color: #f2b45a; animation: hs-shake .12s infinite; }
 @keyframes hs-tumble { 0% { transform: rotate(0) translateY(0); } 50% { transform: rotate(180deg) translateY(-3px); } 100% { transform: rotate(360deg) translateY(0); } }
 @keyframes hs-shake { 50% { transform: translateX(2px); } }
-.hs-ab em { font-size: 9px; font-style: normal; color: #DF0000; font-weight: 700; margin-top: 3px; }
+.hs-ab em { font-size: 9px; font-style: normal; color: #f2b45a; font-weight: 700; margin-top: 3px; }
 .hs-col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-.hs-box { position: relative; padding: 12px 14px; border: 2px solid #040404; border-radius: 12px; background: #F7F2E6; }
-.hs-box h4 { margin: -12px -14px 10px; padding: 7px 14px; font: 800 11px var(--font-sans); letter-spacing: .14em; text-transform: uppercase; border-bottom: 2px solid #040404; background: #EEE5CE; border-radius: 10px 10px 0 0; }
-.hs-boons { border-color: var(--rc); } .hs-boons h4 { background: color-mix(in srgb, var(--rc) 20%, #EEE5CE); border-color: var(--rc); }
-.hs-list li { display: grid; grid-template-columns: 12px 30px 1fr; align-items: center; gap: 6px; padding: 2px 0; font-size: 13px; border-bottom: 1px dotted #04040422; }
-.hs-list li i, .hs-legend i { width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid #040404; display: inline-block; }
-.hs-list li i.on, .hs-legend i.on { background: #040404; } .hs-list li i.ex, .hs-legend i.ex { background: #DF0000; border-color: #DF0000; box-shadow: 0 0 0 2px #F7F2E6 inset; }
-.hs-list li b { font-weight: 800; text-align: right; } .hs-list small { color: #8a7a60; font-size: 9px; font-weight: 700; margin-left: 2px; }
-.hs-legend { margin-top: 6px; font-size: 10px; color: #6b5a40; display: flex; align-items: center; gap: 6px; }
+.hs-box { position: relative; padding: 12px 14px; border: 1px solid #e0a24a44; border-radius: 12px; background: #ffffff04; }
+.hs-box h4 { margin: -12px -14px 10px; padding: 8px 14px; font: 800 11px var(--font-sans); letter-spacing: .14em; text-transform: uppercase; color: #f2b45a;
+  border-bottom: 1px solid #e0a24a33; background: linear-gradient(90deg, #e0a24a1f, #0000); border-radius: 11px 11px 0 0; text-shadow: 0 0 10px #e0a24a88; }
+.hs-boons { border-color: var(--rc); box-shadow: 0 0 16px color-mix(in srgb, var(--rc) 30%, transparent); }
+.hs-list li { display: grid; grid-template-columns: 12px 30px 1fr; align-items: center; gap: 6px; padding: 3px 0; font-size: 13px; border-bottom: 1px dotted #ffffff14; }
+.hs-list li i, .hs-legend i { width: 10px; height: 10px; border-radius: 50%; border: 1px solid #b3a285; display: inline-block; }
+.hs-list li i.on, .hs-legend i.on { background: #e0a24a; border-color: #e0a24a; box-shadow: 0 0 8px #e0a24a; } .hs-list li i.ex, .hs-legend i.ex { background: #f3e6c8; border-color: #f3e6c8; box-shadow: 0 0 8px #fff; }
+.hs-list li b { font-weight: 800; text-align: right; } .hs-list small { color: #b3a285; font-size: 9px; font-weight: 700; margin-left: 2px; }
+.hs-legend { margin-top: 6px; font-size: 10px; color: #b3a285; display: flex; align-items: center; gap: 6px; }
 .hs-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.hs-table th { text-align: left; font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #6b5a40; padding-bottom: 4px; }
-.hs-table td { padding: 6px 4px; border-top: 1px solid #04040422; vertical-align: top; } .hs-table td small { display: block; font-size: 10px; color: #8a7a60; }
+.hs-table th { text-align: left; font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #b3a285; padding-bottom: 4px; }
+.hs-table td { padding: 6px 4px; border-top: 1px solid #ffffff12; vertical-align: top; } .hs-table td small { display: block; font-size: 10px; color: #b3a285; }
+.hs-table td b { color: #f2b45a; }
 .hs-acts { display: grid; gap: 10px; } @media (min-width: 640px) { .hs-acts { grid-template-columns: 1.4fr 1fr 1fr; } }
-.hs-acts p { font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #DF0000; margin-bottom: 4px; }
-.hs-acts span { display: inline-block; margin: 0 4px 4px 0; padding: 3px 8px; border-radius: 99px; font-size: 12px; font-weight: 600; background: #040404; color: #F7F2E6; }
-.hs-acts div:nth-child(2) span { background: #DF0000; color: #fff; } .hs-acts div:nth-child(3) span { background: #959595; color: #040404; }
-.hs-feat li { position: relative; padding: 3px 0 3px 14px; font-size: 13px; line-height: 1.35; } .hs-feat li::before { content: '◆'; position: absolute; left: 0; top: 4px; font-size: 8px; color: #DF0000; }
+.hs-acts p { font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #b3a285; margin-bottom: 4px; }
+.hs-acts span { display: inline-block; margin: 0 4px 4px 0; padding: 3px 9px; border-radius: 99px; font-size: 12px; font-weight: 600; border: 1px solid #f3e6c844; color: #f3e6c8; }
+.hs-acts div:nth-child(2) span { border-color: #e0a24a; color: #fff; background: #e0a24a26; box-shadow: 0 0 10px #e0a24a44; } .hs-acts div:nth-child(3) span { border-color: #b3a285; color: #d6c6a6; }
+.hs-feat li { position: relative; padding: 3px 0 3px 14px; font-size: 13px; line-height: 1.35; color: #eadcc0; } .hs-feat li::before { content: '◆'; position: absolute; left: 0; top: 4px; font-size: 8px; color: #e0a24a; text-shadow: 0 0 6px #e0a24a; }
 .hs-foot { display: grid; gap: 14px; margin-top: 14px; } @media (min-width: 768px) { .hs-foot { grid-template-columns: repeat(3, 1fr); } }
-.hs-p { font-size: 13px; line-height: 1.45; }
-.hs-coins { display: flex; gap: 8px; margin-top: 10px; }
-.hs-coins span { display: flex; align-items: center; gap: 5px; padding: 3px 9px 3px 4px; border-radius: 99px; font-size: 11px; font-weight: 800; border: 1.5px solid #040404; }
-.hs-coins b { display: grid; place-items: center; min-width: 26px; height: 26px; border-radius: 50%; font-size: 12px; color: #040404; }
-.c-mm b { background: #a30000; } .c-sm b { background: #d8d8d8; } .c-zm b { background: #ff8a7a; } .c-pm b { background: #e8eef5; box-shadow: inset 0 0 0 2px #959595; }
-.hs-text { width: 100%; min-height: 84px; resize: vertical; padding: 8px 10px; font-size: 13px; line-height: 1.45; color: #040404; background: #fff9; border: 1.5px dashed #04040466; border-radius: 8px; outline: none; }
-.hs-text:focus { border-color: #DF0000; background: #fff; }
-.hs-note { margin-top: 12px; font-size: 11px; color: #6b5a40; text-align: right; }
-.hs-title { font: 700 30px/1 var(--font-display); padding-bottom: 10px; border-bottom: 3px solid #DF0000; }
-.hs-slot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #DF0000; background: #fff; }
+.hs-p { font-size: 13px; line-height: 1.45; color: #eadcc0; }
+.hs-coins { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.hs-text { width: 100%; min-height: 84px; resize: vertical; padding: 8px 10px; font-size: 13px; line-height: 1.45; color: #f3e6c8; background: #140b05; border: 1px dashed #e0a24a66; border-radius: 8px; outline: none; transition: border-color var(--t) var(--ease), box-shadow var(--t) var(--ease); }
+.hs-text:focus { border-color: #e0a24a; border-style: solid; box-shadow: 0 0 14px #e0a24a44; }
+.hs-note { margin-top: 12px; font-size: 11px; color: #b3a285; text-align: right; }
+.hs-title { font: 700 30px/1 var(--font-display); padding-bottom: 10px; border-bottom: 1px solid #e0a24a44; text-shadow: 0 0 16px #e0a24a77; }
+.hs-slot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #e0a24a; box-shadow: 0 0 8px #e0a24a; }
 
-@media print {
-  body * { visibility: hidden !important; }
-  .hs-print, .hs-print * { visibility: visible !important; }
-  .hs-print { position: relative; box-shadow: none !important; break-inside: avoid; page-break-after: always; }
-  .hs-reroll { display: none !important; }
-}
 @media (prefers-reduced-motion: reduce) { .hs-in, .hs-ab.rolling *, .hg-flare { animation: none !important; } }
 </style>

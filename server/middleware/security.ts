@@ -2,7 +2,7 @@ import { readBoundedBody } from '../utils/request-body'
 
 export default defineEventHandler(async (event) => {
   const path = getRequestURL(event).pathname
-  if (path.startsWith('/api/admin') || path.startsWith('/dragons') || path === '/api/booking') {
+  if (path.startsWith('/api/admin') || path.startsWith('/dragons') || path === '/api/booking' || path === '/api/calendar-booking') {
     setResponseHeader(event, 'Cache-Control', 'no-store')
     setResponseHeader(event, 'X-Robots-Tag', 'noindex, nofollow')
   }

@@ -28,7 +28,7 @@ export default defineNuxtPlugin(() => {
       })
     })
   }
-  const utm = Object.fromEntries(Object.entries(router.currentRoute.value.query).filter(([k]) => ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','yclid'].includes(k)))
+  const utm = Object.fromEntries(Object.entries(router.currentRoute.value.query).filter(([k]) => ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','yclid','group_id'].includes(k)))
   if (Object.keys(utm).length) try { sessionStorage.setItem('utm', JSON.stringify(utm)) } catch {}
   return { provide: { ymGoal: (goal: string) => { if (id && !admin(router.currentRoute.value.path)) window.ym?.(id, 'reachGoal', goal) } } }
 })

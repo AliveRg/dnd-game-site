@@ -14,7 +14,7 @@ useHead({
 
 <template>
   <!-- Золотая полоска загрузки при переходах между страницами -->
-  <NuxtLoadingIndicator color="linear-gradient(90deg,#8a0000,#F7F2E6,#DF0000)" :height="3" :throttle="0" />
+  <NuxtLoadingIndicator color="linear-gradient(90deg,#7e4515,#f3e6c8,#e0a24a)" :height="3" :throttle="0" />
   <IntroGate />
   <NuxtLayout>
     <NuxtPage />

@@ -11,7 +11,7 @@ const { data: games } = await useGames()
 
 <template>
   <div>
-    <section id="karta" class="section">
+    <section id="karta" class="section !pb-0">
       <div class="container-x">
         <SectionTitle icon="key" as="h1">Сюжеты и карта миров</SectionTitle>
         <p class="-mt-3 mb-6 text-ash">Каждая история живёт на своём острове. Острова пока белые - наведите, и мир построится из кубиков. Нажмите или выберите локацию в списке, чтобы открыть историю.</p>
@@ -23,6 +23,10 @@ const { data: games } = await useGames()
       </div>
     </section>
 
-
+    <section id="generator" class="section !pt-2 md:!pt-8">
+      <div class="container-x">
+        <HeroTeaser />
+      </div>
+    </section>
   </div>
 </template>

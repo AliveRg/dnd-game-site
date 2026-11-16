@@ -31,13 +31,13 @@ const poly = computed(() => shown.value.map((v, i) => pt(i, v).join(',')).join('
     <polygon v-for="v in [20, 15, 10, 5]" :key="v" :points="ring(v)" fill="none" stroke="#ffffff1f" stroke-width="1" />
     <line v-for="(_, i) in ABILITIES" :key="'l' + i" :x1="C" :y1="C" :x2="pt(i, 20)[0]" :y2="pt(i, 20)[1]" stroke="#ffffff14" />
     <polygon :points="ring(10)" fill="none" stroke="#ffffff40" stroke-dasharray="3 3" />
-    <polygon :points="poly" :fill="color || '#DF0000'" fill-opacity=".28" :stroke="color || '#DF0000'" stroke-width="2.5" stroke-linejoin="round" />
-    <circle v-for="(v, i) in shown" :key="'p' + i" :cx="pt(i, v)[0]" :cy="pt(i, v)[1]" r="3.5" :fill="color || '#DF0000'" />
+    <polygon :points="poly" :fill="color || '#e0a24a'" fill-opacity=".28" :stroke="color || '#e0a24a'" stroke-width="2.5" stroke-linejoin="round" />
+    <circle v-for="(v, i) in shown" :key="'p' + i" :cx="pt(i, v)[0]" :cy="pt(i, v)[1]" r="3.5" :fill="color || '#e0a24a'" />
     <text v-for="(a, i) in ABILITIES" :key="a.id" :x="pt(i, 24.5)[0]" :y="pt(i, 24.5)[1] + 4" text-anchor="middle" class="hr-lbl">{{ a.short }} {{ values[i] || '' }}</text>
   </svg>
 </template>
 
 <style>
 .hero-radar { width: 100%; height: auto; overflow: visible; }
-.hr-lbl { font: 700 10px var(--font-sans); fill: #EEE5CE; letter-spacing: .04em; }
+.hr-lbl { font: 700 10px var(--font-sans); fill: #e9dcc0; letter-spacing: .04em; }
 </style>

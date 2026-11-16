@@ -70,7 +70,7 @@ watch([selectedId, hoverId], () => nextTick(() => { const id = hoverId.value ?? 
         <div class="min-w-0 flex-1">
           <div class="flex flex-wrap items-center gap-2">
             <span class="badge">{{ story.meta?.kind }}</span>
-            <span v-if="story.meta?.adult" class="badge" style="background: #8a0000">18+</span>
+            <span v-if="story.meta?.adult" class="badge" style="background: #7e4515">18+</span>
             <span class="text-xs uppercase tracking-widest text-ash">{{ selected.name }}</span>
             <div v-if="selected.games.length > 1" class="ml-auto flex gap-1.5">
               <button v-for="(g, i) in selected.games" :key="g.slug" type="button" class="nav-pill px-2.5 py-1 text-xs" :class="i === storyIdx && 'router-link-exact-active'" @click="storyIdx = i">История {{ i + 1 }}</button>
@@ -94,20 +94,20 @@ watch([selectedId, hoverId], () => nextTick(() => { const id = hoverId.value ?? 
 </template>
 
 <style>
-.map-label { position: absolute; transform: translate(-50%, -50%); pointer-events: none; white-space: nowrap; padding: 5px 12px; border-radius: 8px;
-  font-family: var(--font-display); font-size: 18px; line-height: 1; color: #F7F2E6; background: #040404e6; border: 1px solid #DF000099; box-shadow: 0 6px 16px #000a; }
-.zone-list { max-height: 560px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #3a3333 transparent; display: flex; flex-direction: column; gap: 2px; }
+.map-label { position: absolute; z-index: 2; transform: translate(-50%, calc(-100% - 64px)); pointer-events: none; white-space: nowrap; padding: 5px 12px; border-radius: 8px;
+  font-family: var(--font-display); font-size: 18px; line-height: 1; color: #f3e6c8; background: #100904e6; border: 1px solid #e0a24a99; box-shadow: 0 6px 16px #000a; }
+.zone-list { max-height: 560px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #5a3416 transparent; display: flex; flex-direction: column; gap: 2px; }
 .zone-item { display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 10px; text-align: left; border: 1px solid transparent;
   transition: background var(--t) var(--ease), border-color var(--t) var(--ease), transform var(--t) var(--ease); }
-.zone-item b { display: block; font-size: 14px; font-weight: 700; color: #F7F2E6; }
-.zone-item small { display: block; font-size: 11px; line-height: 1.3; color: #959595; }
-.zone-item em { font-style: normal; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 99px; background: #DF0000; color: #fff; }
-.zone-item .zi-ico { color: #959595; transition: color var(--t) var(--ease); }
+.zone-item b { display: block; font-size: 14px; font-weight: 700; color: #f3e6c8; }
+.zone-item small { display: block; font-size: 11px; line-height: 1.3; color: #b3a285; }
+.zone-item em { font-style: normal; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 99px; background: #e0a24a; color: #fff; }
+.zone-item .zi-ico { color: #b3a285; transition: color var(--t) var(--ease); }
 .zone-item.hot, .zone-item:hover { background: #ffffff0a; transform: translateX(2px); }
-.zone-item.on { background: #DF000018; border-color: #DF000066; } .zone-item.on .zi-ico, .zone-item:hover .zi-ico { color: #DF0000; }
+.zone-item.on { background: #e0a24a18; border-color: #e0a24a66; } .zone-item.on .zi-ico, .zone-item:hover .zi-ico { color: #e0a24a; }
 .zone-story { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
-.zs-ico { flex: none; color: #DF0000; }
-.zs-tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 99px; border: 1px solid #3a3333; color: #c9c2b4; }
+.zs-ico { flex: none; color: #e0a24a; }
+.zs-tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 99px; border: 1px solid #5a3416; color: #d6c6a6; }
 .zs-enter-active, .zs-leave-active { transition: opacity var(--t) var(--ease), transform var(--t) var(--ease); }
 .zs-enter-from { opacity: 0; transform: translateY(8px); } .zs-leave-to { opacity: 0; }
 </style>
