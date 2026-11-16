@@ -37,6 +37,7 @@ try{
  let started=false
  for(let attempt=0;attempt<100;attempt++){try{const r=await call('/api/health');if(r.status===200){started=true;break}}catch{}await new Promise(resolve=>setTimeout(resolve,100))}
  assert.ok(started,logs)
+ assert.equal((await call('/generator-geroya')).status,200)
  assert.equal((await call('/api/admin/posts',{cookie:false})).status,401)
  assert.equal((await call('/api/admin/login',{method:'POST',body:{login:'test-admin',password:'local-only-integration-password'}})).status,200)
  const originalCookie=[...jar].map(([k,v])=>`${k}=${v}`).join('; ')
