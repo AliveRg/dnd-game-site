@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { CLUB_PHONE, CLUB_PHONE_LABEL, CLUB_ADDRESS } from '#shared/club-content'
-const {data:content}=await useFetch<any>('/api/site-content',{key:'site-content'})
+const {data:content}=await usePreviewFetch<any>('/api/site-content',{key:'site-content'})
 useSiteSeo({title:'Контакты D&D-Club — Белгород, проспект Славы, 9Г',description:'Очные игры D&D в Белгороде. Адрес — проспект Славы, 9Г. Телефон +7 (999) 999-99-99. Оставьте заявку на игру в клубе.'})
 </script>
 <template>

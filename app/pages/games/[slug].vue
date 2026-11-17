@@ -3,7 +3,7 @@ import { storyTheme } from '#shared/card-themes'
 import { shortTitle } from '#shared/story-art'
 const route = useRoute()
 const cfg = useRuntimeConfig().public
-const { data: game, error } = await useFetch<any>(`/api/posts/${route.params.slug}`)
+const { data: game, error } = await usePreviewFetch<any>(`/api/posts/${route.params.slug}`)
 if (error.value || !game.value) throw createError({ statusCode: 404, message: 'Сюжет не найден', fatal: true })
 
 const m = computed(() => game.value.meta || {})

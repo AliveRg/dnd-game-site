@@ -13,6 +13,7 @@ function pick(event:Event){const value=(event as CustomEvent).detail;if(TARIFFS_
 onMounted(()=>{requestId.value=crypto.randomUUID();if(!props.quick)window.addEventListener('tariff-pick',pick)})
 onBeforeUnmount(()=>window.removeEventListener('tariff-pick',pick))
 async function submit(){
+    alert('Это предпросмотр сайта. Отправка заявок здесь отключена.'); return;
  error.value=''
  if(!form.consent){consentRef.value?.nudge();return}
  try{normalizePhone(form.contact)}catch{error.value='Укажите корректный номер телефона';return}

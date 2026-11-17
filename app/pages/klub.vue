@@ -1,14 +1,14 @@
 <script setup lang="ts">
 // Объединённая страница: О клубе + Статьи + Новости
-const {data:articles}=await useFetch<any[]>('/api/posts',{query:{type:'article'},default:()=>[]})
+const {data:articles}=await usePreviewFetch<any[]>('/api/posts',{query:{type:'article'},default:()=>[]})
 const cfg = useRuntimeConfig().public
-const {data:content}=await useFetch<any>('/api/site-content',{key:'site-content'})
+const {data:content}=await usePreviewFetch<any>('/api/site-content',{key:'site-content'})
 useSiteSeo({
   title: `Клуб НРИ ${cfg.cityIn}: о нас, статьи и новости`,
   description: `${cfg.siteName} - клуб настольных ролевых игр ${cfg.cityIn}. Как проходят игры, правила стола, гайды по D&D и новости клуба.`
 })
 const tab = ref<'news' | 'novelty' | 'article'>('news')
-const { data: posts } = await useFetch<any[]>('/api/posts', { query: { type: tab }, default: () => [] })
+const { data: posts } = await usePreviewFetch<any[]>('/api/posts', { query: { type: tab }, default: () => [] })
 const tabs = [{ id: 'news', label: 'Новости' }, { id: 'novelty', label: 'Новинки' }, { id: 'article', label: 'Заметки' }] as const
 const rules = ['Уважаем других игроков и их время', 'Обсуждаем границы перед хоррор-историями', 'Отмена - не позже чем за 24 часа', 'Новичкам всегда помогаем с правилами']
 </script>

@@ -8,7 +8,7 @@ useSiteSeo({
 })
 
 const { data: games } = await useGames()
-const {data:content}=await useFetch<any>('/api/site-content',{key:'site-content'})
+const {data:content}=await usePreviewFetch<any>('/api/site-content',{key:'site-content'})
 
 const features = [
   { icon: '/art/decor-book.webp', title: 'Новая история каждую неделю', text: 'Каждую неделю открываем запись на новый сюжет в новом сеттинге - от сказки до хоррора.' },

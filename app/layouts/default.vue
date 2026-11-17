@@ -4,7 +4,7 @@ import { LANDINGS, pagePath, fillCity } from '#shared/seo-pages'
 const cfg = useRuntimeConfig().public
 const route = useRoute()
 const open = ref(false)
-const {data:articles}=await useFetch<any[]>('/api/posts',{query:{type:'article'},default:()=>[]})
+const {data:articles}=await usePreviewFetch<any[]>('/api/posts',{query:{type:'article'},default:()=>[]})
 // Меню из 4 пунктов: объединённые страницы
 const nav = [
   { to: '/', label: 'Главная' },
@@ -71,7 +71,7 @@ useHead({
       </nav>
     </header>
 
-    <main class="flex-1 pt-[72px]">
+    <main class="flex-1 pt-[72px]"><p class="bg-amber-950 px-4 py-2 text-center text-sm text-amber-100">Предпросмотр новой версии · формы и админка доступны только на основном сервере</p>
       <slot />
       <LazyBookingSection v-if="showBooking" hydrate-on-visible />
     </main>

@@ -12,6 +12,7 @@ const uid = useId()
 
 const consentRef = ref<{ show: () => void; nudge: () => void }>()
 async function submit() {
+    alert('Это предпросмотр сайта. Отправка заявок здесь отключена.'); return;
   if (!form.consent) { consentRef.value?.nudge(); return }
   const ok = check({
     name: () => (form.name.trim().length < 2 ? 'Как к вам обращаться?' : null),

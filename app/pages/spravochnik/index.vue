@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const {data:posts}=await useFetch<any[]>('/api/posts',{query:{type:'reference',limit:100},default:()=>[]})
+const {data:posts}=await usePreviewFetch<any[]>('/api/posts',{query:{type:'reference',limit:100},default:()=>[]})
 const search=ref(''),category=ref('')
 const categories=computed(()=>[...new Set(posts.value.map(p=>String(p.meta?.category||'Основы')))])
 const filtered=computed(()=>posts.value.filter(p=>(!category.value||(p.meta?.category||'Основы')===category.value)&&`${p.title} ${p.excerpt}`.toLowerCase().includes(search.value.toLowerCase())))

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Фон hero: фото сменяются с плавным зумом. Добавляй фото в массив (лучше webp 1920px, до 250 КБ).
-const {data:content}=await useFetch<any>('/api/site-content',{key:'site-content'})
+const {data:content}=await usePreviewFetch<any>('/api/site-content',{key:'site-content'})
 const defaults = ['/photos/hero-room.webp', '/photos/g-shelves.webp', '/photos/g-minis.webp']
 const slides = computed(()=>content.value?.home?.images?.length?content.value.home.images.map((p:any)=>p.url):defaults)
 const i = ref(0)
