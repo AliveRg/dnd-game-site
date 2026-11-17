@@ -1,5 +1,6 @@
 import { seedGames } from '../data/games'
 import { ARTICLES, fillCity } from '../../shared/seo-pages'
+import { referenceLibrary } from '../data/reference-library'
 import { referenceDrafts } from '../data/reference-drafts'
 
 // Создаёт таблицы при старте и заливает стартовые сюжеты, если таблица пустая.
@@ -113,6 +114,25 @@ export default defineNitroPlugin(async () => {
           await seedClient.query(`INSERT INTO posts(type,slug,title,excerpt,body,meta,published) VALUES('reference',$1,$2,$3,$4,$5,false) ON CONFLICT(slug) DO NOTHING`,[draft.slug,draft.title,draft.excerpt,draft.body,JSON.stringify(meta)])
         }
         await seedClient.query("INSERT INTO schema_migrations(name) VALUES('seed-reference-drafts-v1')")
+      }
+      const refresh = await seedClient.query("SELECT 1 FROM schema_migrations WHERE name='nri-public-refresh-v1'")
+      if (!refresh.rowCount) {
+        for (const item of referenceLibrary) {
+          await seedClient.query(`INSERT INTO posts(type,slug,title,excerpt,body,meta,published) VALUES('reference',$1,$2,$3,$4,$5,true) ON CONFLICT(slug) DO NOTHING`,[item.slug,item.title,item.excerpt,item.body,JSON.stringify(item.meta)])
+        }
+        await seedClient.query(`UPDATE site_content SET content=jsonb_set(content,'{text}',to_jsonb($1::text)) WHERE section='club'`,['Клуб настольных ролевых игр в Белгороде с несколькими мастерами. Выбирайте истории и форматы по интересам. Ведущие помогают новичкам, готовят приключения и проводят партии; дату и ведущего согласуем при записи.'])
+        // Update only known club photographs, including CMS content and post galleries.
+        const replacements = [
+          ['/photos/hero-master.webp','/photos/hero-room.webp'],['/photos/hero-maps.webp','/photos/hero-room.webp'],['/photos/hero-girl.webp','/photos/hero-room.webp'],
+          ['/photos/g-master.webp','/photos/g-room.webp'],['/photos/g-maps.webp','/photos/g-shelves.webp'],['/photos/g-girl.webp','/photos/g-minis.webp'],['/photos/g-axe.webp','/photos/g-shelves.webp'],['/photos/master.webp','/photos/g-shelves.webp'],
+          ['Участник клуба с книгой правил и игровым реквизитом','Книги правил и игровые материалы'],['Ведущий проводит игру за ширмой мастера','Игровая комната клуба'],['Участница игры с реквизитом за игровым столом','Коллекция миниатюр'],['Ведущий показывает карты игровых миров','Книги правил и настольные игры'],['+79040901764','+79999999999'],['+7 (904) 090-17-64','+7 (999) 999-99-99'],
+          ['01-master-axe-','02-books-'],['03-game-master-','06-room-'],['04-player-','05-miniatures-'],['07-world-maps-','02-books-']
+        ]
+        for(const [before,after] of replacements) {
+          await seedClient.query('UPDATE site_content SET content=replace(content::text,$1,$2)::jsonb WHERE strpos(content::text,$1)>0',[before,after])
+          await seedClient.query(`UPDATE posts SET cover=replace(cover,$1,$2), meta=replace(meta::text,$1,$2)::jsonb WHERE strpos(COALESCE(cover,'') || meta::text,$1)>0`,[before,after])
+        }
+        await seedClient.query("INSERT INTO schema_migrations(name) VALUES('nri-public-refresh-v1')")
       }
       await seedClient.query('COMMIT')
     } catch (e) {

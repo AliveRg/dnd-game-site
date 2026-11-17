@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   if (raw?.website) throw createError({ statusCode: 400, message: 'Не удалось отправить форму' })
   let b: ReturnType<typeof validateBooking>
   try { b = validateBooking(raw) } catch (e) { throw createError({ statusCode: 400, message: (e as Error).message }) }
-  if (!isDbConfigured()) throw createError({ statusCode: 503, message: 'Приём заявок временно недоступен. Позвоните +7 (904) 090-17-64' })
+  if (!isDbConfigured()) throw createError({ statusCode: 503, message: 'Приём заявок временно недоступен. Позвоните +7 (999) 999-99-99' })
   const hash = createHash('sha256').update(JSON.stringify({ ...b, requestId: undefined })).digest('hex')
   try {
     const db = useDb()

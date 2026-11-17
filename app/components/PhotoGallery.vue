@@ -2,13 +2,9 @@
 // Галерея клуба: «плитка» из фото, неоновый кант, при наведении фото оживает. Клик открывает фото крупно (стрелки, Esc).
 const props = withDefaults(defineProps<{ compact?: boolean; images?: {url:string;alt:string}[] }>(), { compact: false })
 const all = [
-  { src: '/photos/g-master.webp', alt: 'Мастер ведёт партию за ширмой с драконом', cap: 'Мастер за ширмой', cls: 'g-tall' },
-  { src: '/photos/g-maps.webp', alt: 'Стена с картами миров клуба', cap: 'Стена карт: здесь рождаются миры', cls: 'g-wide' },
-  { src: '/photos/g-girl.webp', alt: 'Игрок в рогатом шлеме радуется победе', cap: 'Когда выпала двадцатка', cls: '' },
-  { src: '/photos/g-minis.webp', alt: 'Коллекция миниатюр на полках', cap: 'Сотни миниатюр', cls: '' },
-  { src: '/photos/g-axe.webp', alt: 'Игрок с секирой изучает книгу правил', cap: 'Сверяемся с правилами', cls: '' },
-  { src: '/photos/g-shelves.webp', alt: 'Полки с книгами D&D, настольными играми и уточками', cap: 'Книги, игры и уточки', cls: '' },
-  { src: '/photos/g-room.webp', alt: 'Игровая комната клуба с полем и кубиками', cap: 'Наша комната', cls: 'g-banner' }
+  { src: '/photos/g-minis.webp', alt: 'Коллекция миниатюр на полках', cap: 'Миниатюры для приключений', cls: '' },
+  { src: '/photos/g-shelves.webp', alt: 'Книги правил и настольные игры', cap: 'Книги и игры', cls: '' },
+  { src: '/photos/g-room.webp', alt: 'Игровая комната без людей', cap: 'Наш игровой стол', cls: 'g-banner' }
 ]
 const photos = computed(() => {const list=props.images!==undefined?props.images.map(p=>({src:p.url,alt:p.alt,cap:p.alt,cls:''})):all;return props.compact?list.slice(0,6):list})
 const open = ref<number | null>(null)

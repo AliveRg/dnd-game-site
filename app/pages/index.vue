@@ -4,7 +4,7 @@ const city = cfg.cityIn ? ` ${cfg.cityIn}` : ''
 
 useSiteSeo({
   title: `Клуб D&D и НРИ${city} - 4 часа за 2000 ₽ с человека`,
-  description: `Играйте в Dungeons & Dragons 5e и другие НРИ${city}: опытный мастер, до 5 игроков, новый сюжет каждую неделю. 4 часа — 2000 ₽ с человека по акции. Запись онлайн.`
+  description: `Играйте в Dungeons & Dragons 5e и другие НРИ${city}: команда мастеров, до 5 игроков, новый сюжет каждую неделю. 4 часа — 2000 ₽ с человека по акции. Запись онлайн.`
 })
 
 const { data: games } = await useGames()
@@ -51,7 +51,7 @@ useHead({
           <span class="badge mb-4">Акция · 4 часа — 2 000 ₽ с человека</span>
           <h1 class="text-4xl md:text-6xl" style="line-height: 1; text-shadow: 0 2px 12px #000, 0 0 22px #e0a24a33">{{content?.home?.title||'Клуб настольных ролевых игр D&D в Белгороде'}}</h1>
           <p class="mt-5 max-w-xl text-lg text-parchment/90" style="text-shadow: 0 1px 8px #000">
-            {{content?.home?.text||'Очные игры в Белгороде, проспект Славы, 9Г. Уникальные сюжеты и миры, живой мастер и до 5 игроков за столом.'}}
+            {{content?.home?.text||'Очные игры в Белгороде, проспект Славы, 9Г. Уникальные сюжеты и миры, разные мастера и до 5 игроков за столом.'}}
           </p>
           <div class="mt-6 flex flex-wrap justify-end gap-3">
             <NuxtLink to="/games" class="btn-ghost">Смотреть сюжеты</NuxtLink>

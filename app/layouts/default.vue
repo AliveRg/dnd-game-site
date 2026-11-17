@@ -53,7 +53,7 @@ useHead({
       <div class="mx-auto flex h-16 w-full max-w-[1360px] items-center justify-between gap-3 px-4 md:px-6">
         <NuxtLink to="/" class="flex items-center gap-2.5" aria-label="На главную">
           <LogoSkull />
-          <span class="gold-text whitespace-nowrap font-display text-xl leading-none lg:max-xl:hidden">{{ cfg.siteName }}</span>
+          <span class="gold-text whitespace-nowrap font-display text-xl leading-none lg:max-xl:hidden">NRI клуб</span>
         </NuxtLink>
         <nav class="hidden items-center gap-1.5 lg:flex" aria-label="Основное меню">
           <NuxtLink v-for="n in nav" :key="n.to" :to="n.to" class="nav-pill whitespace-nowrap">{{ n.label }}</NuxtLink>
