@@ -22,11 +22,11 @@ const rules = ['Уважаем других игроков и их время', 
       <!-- правила стола начинаются на одной линии с первым абзацем -->
       <div class="grid items-start gap-8 lg:grid-cols-[1.4fr_1fr]">
         <div>
-          <p class="text-lg text-parchment/85">{{content?.club?.text||'Клуб настольных ролевых игр в Белгороде. Мастер готовит историю, кубики, карты и миниатюры. Дату игры согласуем при записи.'}}</p>
-          <h3 class="mt-6 text-2xl">Мастер</h3>
+          <p class="text-lg text-parchment/85">{{content?.club?.text||'Клуб настольных ролевых игр в Белгороде. В клубе работают несколько мастеров: каждый ведёт свои истории и помогает участникам освоиться. Кубики, карты и миниатюры есть на месте. Дату игры согласуем при записи.'}}</p>
+          <h3 class="mt-6 text-2xl">Мастера клуба</h3>
           <div class="mt-3 flex flex-col gap-5 sm:flex-row">
-            <img src="/photos/master.webp" alt="Мастер клуба за ширмой с указкой" class="photo-neon aspect-[3/4] w-full flex-none object-cover sm:w-56" loading="lazy" decoding="async" />
-            <p class="text-ash">Мастер знакомит с правилами и ведёт историю. Вы решаете, как действуют герои, исследуете мир и проходите приключение вместе.</p>
+            <img src="/photos/g-shelves.webp" alt="Книги правил и игры на полках клуба" class="photo-neon aspect-[3/4] w-full flex-none object-cover sm:w-56" loading="lazy" decoding="async" />
+            <p class="text-ash">В нашем клубе игры проводят несколько мастеров. Выбирайте сюжет и формат по интересам: ведущие знакомят с правилами, помогают создать героев и проводят приключения для новичков и опытных игроков. При записи согласуем подходящую партию и её ведущего.</p>
           </div>
         </div>
         <div class="card">

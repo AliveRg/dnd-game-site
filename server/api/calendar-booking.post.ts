@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
     throw createError({statusCode:400,message:(error as Error).message})
   }
   booking.contact = raw.contact.trim()
-  if (!isDbConfigured()) throw createError({statusCode:503,message:'Приём заявок временно недоступен. Позвоните +7 (904) 090-17-64'})
+  if (!isDbConfigured()) throw createError({statusCode:503,message:'Приём заявок временно недоступен. Позвоните +7 (999) 999-99-99'})
   const hash = createHash('sha256').update(JSON.stringify({...booking,requestId:undefined,sessionId})).digest('hex')
   let db
   try {
