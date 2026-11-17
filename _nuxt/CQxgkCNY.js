@@ -1,0 +1,1 @@
+import{_ as e}from"./uh06vLky.js";var t=e(`/dnd-game-site/art/decor-dice.webp`);export{t};

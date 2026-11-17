@@ -1,0 +1,1 @@
+import{H as e,b as t,p as n}from"./BcP5lhcs.js";var r=[`src`],i=Object.assign(t({__name:`DecorIcon`,props:{name:{}},setup(t){return(i,a)=>(e(),n(`img`,{src:`/dnd-game-site/art/decor-${t.name}.webp`,alt:``,width:`256`,height:`256`,class:`decor-icon`,loading:`lazy`,decoding:`async`},null,8,r))}}),{__name:`DecorIcon`});export{i as t};

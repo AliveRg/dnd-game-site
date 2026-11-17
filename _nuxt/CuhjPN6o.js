@@ -1,0 +1,1 @@
+import{t as e}from"./CsUGTe0V.js";var t=(e,t,n)=>n.cause===`refresh:manual`?void 0:t.payload.data[e]??t.static.data[e],n=()=>e(`/api/games`,{key:`games`,default:()=>[],getCachedData:t}),r=()=>e(`/api/sessions`,{key:`sessions`,default:()=>[],getCachedData:t});export{r as n,n as t};

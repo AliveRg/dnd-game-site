@@ -1,0 +1,5 @@
+{
+ "id":"/dragons","name":"Драконы — управление клубом","short_name":"Драконы","lang":"ru",
+ "start_url":"/dragons","scope":"/dragons","display":"standalone","background_color":"#120d0a","theme_color":"#120d0a",
+ "icons":[{"src":"/dragons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},{"src":"/dragons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]
+}

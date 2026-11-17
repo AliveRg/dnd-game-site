@@ -1,0 +1,1 @@
+import{H as e,K as t,p as n}from"./BcP5lhcs.js";import{t as r}from"./BDNMzG2s.js";var i={},a={class:`min-h-dvh overflow-x-hidden bg-ink text-parchment`};function o(r,i){return e(),n(`div`,a,[t(r.$slots,`default`)])}var s=r(i,[[`render`,o]]);export{s as default};

@@ -1,0 +1,1 @@
+import{H as e,p as t}from"./BcP5lhcs.js";import{t as n}from"./C4JM0T-7.js";import{t as r}from"./BDNMzG2s.js";var i={},a={src:n,alt:``,width:`20`,height:`20`,class:`inline-block h-[1.35em] w-[1.35em] align-[-0.3em] object-contain`,loading:`lazy`,decoding:`async`};function o(n,r){return e(),t(`img`,a)}var s=Object.assign(r(i,[[`render`,o]]),{__name:`IconPeople`});export{s as t};
